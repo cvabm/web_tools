@@ -1,0 +1,175 @@
+<script type="text/javascript">
+        var gk_isXlsx = false;
+        var gk_xlsxFileLookup = {};
+        var gk_fileData = {};
+        function filledCell(cell) {
+          return cell !== '' && cell != null;
+        }
+        function loadFileData(filename) {
+        if (gk_isXlsx && gk_xlsxFileLookup[filename]) {
+            try {
+                var workbook = XLSX.read(gk_fileData[filename], { type: 'base64' });
+                var firstSheetName = workbook.SheetNames[0];
+                var worksheet = workbook.Sheets[firstSheetName];
+
+                // Convert sheet to JSON to filter blank rows
+                var jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1, blankrows: false, defval: '' });
+                // Filter out blank rows (rows where all cells are empty, null, or undefined)
+                var filteredData = jsonData.filter(row => row.some(filledCell));
+
+                // Heuristic to find the header row by ignoring rows with fewer filled cells than the next row
+                var headerRowIndex = filteredData.findIndex((row, index) =>
+                  row.filter(filledCell).length >= filteredData[index + 1]?.filter(filledCell).length
+                );
+                // Fallback
+                if (headerRowIndex === -1 || headerRowIndex > 25) {
+                  headerRowIndex = 0;
+                }
+
+                // Convert filtered JSON back to CSV
+                var csv = XLSX.utils.aoa_to_sheet(filteredData.slice(headerRowIndex)); // Create a new sheet from filtered array of arrays
+                csv = XLSX.utils.sheet_to_csv(csv, { header: 1 });
+                return csv;
+            } catch (e) {
+                console.error(e);
+                return "";
+            }
+        }
+        return gk_fileData[filename] || "";
+        }
+        </script><!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SDP Formatter</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            font-family: monospace;
+            background-color: #f3f4f6;
+        }
+        #output {
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            background-color: #fff;
+            padding: 10px;
+            border: 1px solid #d1d5db;
+            border-radius: 4px;
+            min-height: 200px;
+        }
+        .section { color: #1E40AF; font-weight: bold; } /* v=, o=, s=, t= */
+        .media { color: #047857; font-weight: bold; } /* m= */
+        .connection { color: #92400E; } /* c= */
+        .attribute { color: #065F46; } /* a= */
+        .rtpmap { color: #065F46; font-style: italic; } /* rtpmap, fmtp */
+        .ssrc { color: #92400E; font-style: italic; } /* ssrc */
+        .error { color: #DC2626; font-weight: bold; }
+        textarea {
+            resize: vertical;
+        }
+    </style>
+</head>
+<body class="flex flex-col items-center min-h-screen p-4">
+    <h1 class="text-2xl font-bold mb-4">SDP Formatter</h1>
+    <p class="text-gray-600 mb-4">Paste your SDP string below and click "Format SDP" to see a structured, color-coded output.</p>
+    <div class="w-full max-w-2xl">
+        <textarea id="sdpInput" class="w-full h-40 p-2 border rounded mb-4" placeholder="Paste your SDP here..."></textarea>
+        <div class="flex space-x-2 mb-4">
+            <button onclick="formatSDP()" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">Format SDP</button>
+            <button onclick="copyOutput()" class="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600">Copy Output</button>
+        </div>
+        <div id="output" class="mt-4 text-sm">
+            <pre>Formatted SDP will appear here...</pre>
+        </div>
+    </div>
+
+    <script>
+        function formatSDP() {
+            try {
+                const input = document.getElementById('sdpInput').value;
+                if (!input.trim()) {
+                    document.getElementById('output').innerHTML = '<pre class="error">Error: Please enter a valid SDP string.</pre>';
+                    return;
+                }
+
+                // Normalize and split SDP into lines
+                const lines = input.split('\\r\\n').map(line => line.trim()).filter(line => line);
+                if (lines.length === 0) {
+                    document.getElementById('output').innerHTML = '<pre class="error">Error: No valid lines found in SDP.</pre>';
+                    return;
+                }
+
+                let html = '<ul class="list-none">';
+                let indentLevel = 0;
+                let inMediaSection = false;
+
+                lines.forEach(line => {
+                    let className = '';
+                    let content = line;
+
+                    // Determine class based on line type
+                    if (line.startsWith('v=') || line.startsWith('o=') || line.startsWith('s=') || line.startsWith('t=') || line.startsWith('b=')) {
+                        className = 'section';
+                        inMediaSection = false;
+                        if (indentLevel > 0) html += '</ul>'; // Close previous sublist
+                        indentLevel = 0;
+                    } else if (line.startsWith('m=')) {
+                        className = 'media';
+                        inMediaSection = true;
+                        if (indentLevel > 0) html += '</ul>'; // Close previous sublist
+                        indentLevel = 1;
+                    } else if (line.startsWith('c=')) {
+                        className = 'connection';
+                    } else if (line.startsWith('a=')) {
+                        className = 'attribute';
+                    } else if (line.startsWith('rtpmap:') || line.startsWith('fmtp:')) {
+                        className = 'rtpmap';
+                    } else if (line.startsWith('ssrc:')) {
+                        className = 'ssrc';
+                    }
+
+                    // Adjust indentation for media subsections
+                    if (inMediaSection && !line.startsWith('m=')) {
+                        if (indentLevel === 1 && (line.startsWith('a=') || line.startsWith('c=') || line.startsWith('rtpmap:') || line.startsWith('fmtp:') || line.startsWith('ssrc:'))) {
+                            html += '<ul class="ml-4 list-none">';
+                            indentLevel = 2;
+                        } else if (indentLevel === 2 && !line.startsWith('a=') && !line.startsWith('c=') && !line.startsWith('rtpmap:') && !line.startsWith('fmtp:') && !line.startsWith('ssrc:')) {
+                            html += '</ul>';
+                            indentLevel = 1;
+                        }
+                    }
+
+                    // Add list item with class
+                    const indent = '  '.repeat(Math.max(0, indentLevel - 1));
+                    html += `<li class="${className}">${indent}${content}</li>`;
+                });
+
+                if (indentLevel > 0) html += '</ul>'; // Close any open lists
+                html += '</ul>';
+
+                document.getElementById('output').innerHTML = html;
+            } catch (err) {
+                console.error('Format SDP Error:', err);
+                document.getElementById('output').innerHTML = `<pre class="error">Error formatting SDP: ${err.message}</pre>`;
+            }
+        }
+
+        function copyOutput() {
+            try {
+                const outputElement = document.getElementById('output');
+                const text = outputElement.innerText || outputElement.textContent;
+                navigator.clipboard.writeText(text).then(() => {
+                    alert('Formatted SDP copied to clipboard!');
+                }).catch(err => {
+                    console.error('Copy failed:', err);
+                    alert('Failed to copy. Please copy manually.');
+                });
+            } catch (err) {
+                console.error('Copy Error:', err);
+                document.getElementById('output').innerHTML = `<pre class="error">Error copying output: ${err.message}</pre>`;
+            }
+        }
+    </script>
+</body>
+</html>

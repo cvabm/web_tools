@@ -1,0 +1,58 @@
+<!-- 现有代码... -->
+
+<body>
+    <!-- 现有内容... -->
+
+    <!-- 修改后的记事本部分 -->
+    <div class="container-fluid mt-3">
+        <div class="form-group">
+            <textarea id="notepad" class="form-control" style="resize: none; width: 100%; box-sizing: border-box; min-height: 300px; overflow: hidden;"></textarea>
+        </div>
+    </div>
+
+    <!-- 居中悬浮的保存提示 -->
+    <div id="saveNotification" style="position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background-color: rgba(40, 167, 69, 0.8); color: white; padding: 10px 20px; border-radius: 5px; display: none; z-index: 1000;">Saved</div>
+
+    <!-- 现有的脚本引用... -->
+
+    <!-- 记事本功能的脚本 -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const notepad = document.getElementById('notepad');
+            const saveNotification = document.getElementById('saveNotification');
+
+            // 自动调整高度函数
+            function adjustHeight() {
+                notepad.style.height = 'auto';
+                notepad.style.height = notepad.scrollHeight + 'px';
+            }
+
+            // 初始化时调整高度
+            adjustHeight();
+
+            // 从 localStorage 加载保存的内容
+            const savedNote = localStorage.getItem('savedNote');
+            if (savedNote) {
+                notepad.value = savedNote;
+                adjustHeight();
+            }
+
+            // 自动调整高度和自动保存
+            notepad.addEventListener('input', function() {
+                adjustHeight();
+                localStorage.setItem('savedNote', this.value);
+                showSaveNotification();
+            });
+
+            // 显示保存提示
+            function showSaveNotification() {
+                saveNotification.style.display = 'block';
+                setTimeout(() => {
+                    saveNotification.style.display = 'none';
+                }, 2000); // 2秒后隐藏提示
+            }
+        });
+    </script>
+</body>
+
+<!-- 现有代码... -->

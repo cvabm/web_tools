@@ -1,0 +1,226 @@
+<script type="text/javascript">
+        var gk_isXlsx = false;
+        var gk_xlsxFileLookup = {};
+        var gk_fileData = {};
+        function filledCell(cell) {
+          return cell !== '' && cell != null;
+        }
+        function loadFileData(filename) {
+        if (gk_isXlsx && gk_xlsxFileLookup[filename]) {
+            try {
+                var workbook = XLSX.read(gk_fileData[filename], { type: 'base64' });
+                var firstSheetName = workbook.SheetNames[0];
+                var worksheet = workbook.Sheets[firstSheetName];
+
+                // Convert sheet to JSON to filter blank rows
+                var jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1, blankrows: false, defval: '' });
+                // Filter out blank rows (rows where all cells are empty, null, or undefined)
+                var filteredData = jsonData.filter(row => row.some(filledCell));
+
+                // Heuristic to find the header row by ignoring rows with fewer filled cells than the next row
+                var headerRowIndex = filteredData.findIndex((row, index) =>
+                  row.filter(filledCell).length >= filteredData[index + 1]?.filter(filledCell).length
+                );
+                // Fallback
+                if (headerRowIndex === -1 || headerRowIndex > 25) {
+                  headerRowIndex = 0;
+                }
+
+                // Convert filtered JSON back to CSV
+                var csv = XLSX.utils.aoa_to_sheet(filteredData.slice(headerRowIndex)); // Create a new sheet from filtered array of arrays
+                csv = XLSX.utils.sheet_to_csv(csv, { header: 1 });
+                return csv;
+            } catch (e) {
+                console.error(e);
+                return "";
+            }
+        }
+        return gk_fileData[filename] || "";
+        }
+        </script><!DOCTYPE html>
+<html>
+<head>
+  <title>WebRTC Caller</title>
+  <style>
+    video { width: 320px; height: 240px; border: 1px solid black; }
+    textarea { width: 100%; height: 100px; }
+    button { margin: 5px; }
+  </style>
+</head>
+<body>
+  <h2>Caller</h2>
+  <video id="localVideo" autoplay playsinline></video>
+  <video id="remoteVideo" autoplay playsinline></video>
+  <div>
+    <button id="startButton">Start</button>
+    <button id="callButton" disabled>Call</button>
+    <button id="hangupButton" disabled>Hangup</button>
+  </div>
+  <div>
+    <p>Offer SDP (Copy this to Callee):</p>
+    <textarea id="offerSdp" readonly></textarea>
+  </div>
+  <div>
+    <p>Paste Answer SDP from Callee:</p>
+    <textarea id="answerSdp"></textarea>
+    <button id="setAnswerButton" disabled>Set Answer</button>
+  </div>
+  <div>
+    <p>ICE Candidates (Copy to Callee):</p>
+    <textarea id="iceCandidates" readonly></textarea>
+  </div>
+  <div>
+    <p>Paste ICE Candidates from Callee:</p>
+    <textarea id="remoteIceCandidates"></textarea>
+    <button id="addIceButton" disabled>Add ICE</button>
+  </div>
+
+  <script>
+    'use strict';
+
+    const localVideo = document.getElementById('localVideo');
+    const remoteVideo = document.getElementById('remoteVideo');
+    const startButton = document.getElementById('startButton');
+    const callButton = document.getElementById('callButton');
+    const hangupButton = document.getElementById('hangupButton');
+    const offerSdp = document.getElementById('offerSdp');
+    const answerSdp = document.getElementById('answerSdp');
+    const setAnswerButton = document.getElementById('setAnswerButton');
+    const iceCandidates = document.getElementById('iceCandidates');
+    const remoteIceCandidates = document.getElementById('remoteIceCandidates');
+    const addIceButton = document.getElementById('addIceButton');
+
+    let localStream;
+    let localPeerConnection;
+    let startTime = null;
+
+    const mediaStreamConstraints = { video: true };
+    const offerOptions = { offerToReceiveVideo: 1 };
+    const servers = {
+      iceServers: [
+        { urls: ["stun:stun.home-assistant.io:80", "stun:stun.home-assistant.io:3478"] }
+      ]
+    };
+
+    function trace(text) {
+      const now = (window.performance.now() / 1000).toFixed(3);
+      console.log(now, text);
+    }
+
+    function gotLocalMediaStream(mediaStream) {
+      localVideo.srcObject = mediaStream;
+      localStream = mediaStream;
+      trace('Received local stream.');
+      callButton.disabled = false;
+    }
+
+    function handleLocalMediaStreamError(error) {
+      trace(`navigator.getUserMedia error: ${error.toString()}.`);
+    }
+
+    function gotRemoteMediaStream(event) {
+      const mediaStream = event.stream;
+      remoteVideo.srcObject = mediaStream;
+      trace('Received remote stream.');
+    }
+
+    function handleConnection(event) {
+      if (event.candidate) {
+        iceCandidates.value += `${JSON.stringify(event.candidate)}\n`;
+        trace(`ICE candidate: ${event.candidate.candidate}`);
+      }
+    }
+
+    function handleConnectionChange(event) {
+      trace(`ICE state: ${localPeerConnection.iceConnectionState}`);
+    }
+
+    function setSessionDescriptionError(error) {
+      trace(`Failed to set session description: ${error.toString()}.`);
+    }
+
+    function setLocalDescriptionSuccess() {
+      trace('setLocalDescription complete.');
+    }
+
+    function setRemoteDescriptionSuccess() {
+      trace('setRemoteDescription complete.');
+    }
+
+    function createdOffer(description) {
+      trace(`Offer created:\n${description.sdp}`);
+      offerSdp.value = JSON.stringify(description);
+      localPeerConnection.setLocalDescription(description)
+        .then(setLocalDescriptionSuccess)
+        .catch(setSessionDescriptionError);
+      setAnswerButton.disabled = false;
+    }
+
+    function startAction() {
+      startButton.disabled = true;
+      navigator.mediaDevices.getUserMedia(mediaStreamConstraints)
+        .then(gotLocalMediaStream)
+        .catch(handleLocalMediaStreamError);
+      trace('Requesting local stream.');
+    }
+
+    function callAction() {
+      callButton.disabled = true;
+      hangupButton.disabled = false;
+      startTime = window.performance.now();
+
+      localPeerConnection = new RTCPeerConnection(servers);
+      trace('Created local peer connection.');
+      localPeerConnection.addEventListener('icecandidate', handleConnection);
+      localPeerConnection.addEventListener('iceconnectionstatechange', handleConnectionChange);
+      localPeerConnection.addEventListener('addstream', gotRemoteMediaStream);
+
+      localPeerConnection.addStream(localStream);
+      trace('Added local stream to localPeerConnection.');
+
+      localPeerConnection.createOffer(offerOptions)
+        .then(createdOffer)
+        .catch(setSessionDescriptionError);
+    }
+
+    function setAnswerAction() {
+      const answer = JSON.parse(answerSdp.value);
+      localPeerConnection.setRemoteDescription(new RTCSessionDescription(answer))
+        .then(setRemoteDescriptionSuccess)
+        .catch(setSessionDescriptionError);
+      addIceButton.disabled = false;
+    }
+
+    function addIceAction() {
+      const candidates = remoteIceCandidates.value.trim().split('\n');
+      candidates.forEach(candidate => {
+        if (candidate) {
+          localPeerConnection.addIceCandidate(new RTCIceCandidate(JSON.parse(candidate)))
+            .then(() => trace('Added ICE candidate.'))
+            .catch(error => trace(`Failed to add ICE candidate: ${error.toString()}.`));
+        }
+      });
+    }
+
+    function hangupAction() {
+      localPeerConnection.close();
+      localPeerConnection = null;
+      hangupButton.disabled = true;
+      callButton.disabled = false;
+      setAnswerButton.disabled = true;
+      addIceButton.disabled = true;
+      offerSdp.value = '';
+      answerSdp.value = '';
+      iceCandidates.value = '';
+      remoteIceCandidates.value = '';
+      trace('Ending call.');
+    }
+
+    startButton.addEventListener('click', startAction);
+    callButton.addEventListener('click', callAction);
+    setAnswerButton.addEventListener('click', setAnswerAction);
+    addIceButton.addEventListener('click', addIceAction);
+    hangupButton.addEventListener('click', hangupAction);
+  </script>
+</body>
+</html>
