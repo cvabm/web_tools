@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>经纬度坐标转换工具</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 40px auto;
+            padding: 20px;
+            background-color: #f7f7f7;
+        }
+        h1 {
+            text-align: center;
+            color: #333;
+        }
+        .container {
+            background-color: #fff;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+        .input-row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+        }
+        input[type="text"] {
+            flex: 1;
+            min-width: 200px;
+            padding: 12px;
+            font-size: 16px;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+        }
+        select {
+            padding: 12px;
+            font-size: 16px;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+        }
+        button {
+            padding: 12px 24px;
+            font-size: 16px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        .results {
+            margin-top: 20px;
+        }
+        .result-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 15px;
+            padding: 10px;
+            background-color: #f8f9fa;
+            border-radius: 6px;
+        }
+        .result-item span {
+            flex: 1;
+            font-size: 16px;
+            word-break: break-all;
+        }
+        .copy-btn {
+            padding: 8px 16px;
+            font-size: 14px;
+            background-color: #28a745;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        .copy-btn:hover {
+            background-color: #218838;
+        }
+        .error {
+            color: red;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+    <h1>经纬度坐标转换工具</h1>
+    <div class="container">
+        <div class="input-row">
+            <input type="text" id="inputCoords" placeholder="经度,纬度 (例如: 116.404, 39.915)">
+            <select id="sourceType">
+                <option value="WGS84" selected>WGS84</option>
+                <option value="GCJ02">GCJ02</option>
+                <option value="BD09">BD09</option>
+            </select>
+            <button id="convertBtn">转换</button>
+        </div>
+        <div id="errorMsg" class="error"></div>
+        <div class="results" id="results" style="display:none;">
+            <div class="result-item">
+                <strong>WGS84:</strong>
+                <span id="wgs84"></span>
+                <button class="copy-btn" data-target="wgs84">复制</button>
+            </div>
+            <div class="result-item">
+                <strong>GCJ02 (火星/高德):</strong>
+                <span id="gcj02"></span>
+                <button class="copy-btn" data-target="gcj02">复制</button>
+            </div>
+            <div class="result-item">
+                <strong>BD09 (百度):</strong>
+                <span id="bd09"></span>
+                <button class="copy-btn" data-target="bd09">复制</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const PI = Math.PI;
+        const AXIS = 6378245.0;
+        const OFFSET = 0.00669342162296594323;
+
+        function outOfChina(lng, lat) {
+            return lng < 72.004 || lng > 137.8347 || lat < 0.8293 || lat > 55.8271;
+        }
+
+        function transformLat(x, y) {
+            let ret = -100.0 + 2.0 * x + 3.0 * y + 0.2 * y * y + 0.1 * x * y + 0.2 * Math.sqrt(Math.abs(x));
+            ret += (20.0 * Math.sin(6.0 * x * PI) + 20.0 * Math.sin(2.0 * x * PI)) * 2.0 / 3.0;
+            ret += (20.0 * Math.sin(y * PI) + 40.0 * Math.sin(y / 3.0 * PI)) * 2.0 / 3.0;
+            ret += (160.0 * Math.sin(y / 12.0 * PI) + 320 * Math.sin(y * PI / 30.0)) * 2.0 / 3.0;
+            return ret;
+        }
+
+        function transformLng(x, y) {
+            let ret = 300.0 + x + 2.0 * y + 0.1 * x * x + 0.1 * x * y + 0.1 * Math.sqrt(Math.abs(x));
+            ret += (20.0 * Math.sin(6.0 * x * PI) + 20.0 * Math.sin(2.0 * x * PI)) * 2.0 / 3.0;
+            ret += (20.0 * Math.sin(x * PI) + 40.0 * Math.sin(x / 3.0 * PI)) * 2.0 / 3.0;
+            ret += (150.0 * Math.sin(x / 12.0 * PI) + 300.0 * Math.sin(x / 30.0 * PI)) * 2.0 / 3.0;
+            return ret;
+        }
+
+        // WGS84 -> GCJ02
+        function wgs84ToGcj02(lng, lat) {
+            if (outOfChina(lng, lat)) return [lng, lat];
+            let dLat = transformLat(lng - 105.0, lat - 35.0);
+            let dLng = transformLng(lng - 105.0, lat - 35.0);
+            let radLat = lat / 180.0 * PI;
+            let magic = Math.sin(radLat);
+            magic = 1 - OFFSET * magic * magic;
+            let sqrtMagic = Math.sqrt(magic);
+            dLat = (dLat * 180.0) / ((AXIS * (1 - OFFSET)) / (magic * sqrtMagic) * PI);
+            dLng = (dLng * 180.0) / (AXIS / sqrtMagic * Math.cos(radLat) * PI);
+            return [lng + dLng, lat + dLat];
+        }
+
+        // GCJ02 -> WGS84 (近似)
+        function gcj02ToWgs84(lng, lat) {
+            if (outOfChina(lng, lat)) return [lng, lat];
+            let dLat = transformLat(lng - 105.0, lat - 35.0);
+            let dLng = transformLng(lng - 105.0, lat - 35.0);
+            let radLat = lat / 180.0 * PI;
+            let magic = Math.sin(radLat);
+            magic = 1 - OFFSET * magic * magic;
+            let sqrtMagic = Math.sqrt(magic);
+            dLat = (dLat * 180.0) / ((AXIS * (1 - OFFSET)) / (magic * sqrtMagic) * PI);
+            dLng = (dLng * 180.0) / (AXIS / sqrtMagic * Math.cos(radLat) * PI);
+            return [lng * 2 - (lng + dLng), lat * 2 - (lat + dLat)];
+        }
+
+        // GCJ02 -> BD09
+        function gcj02ToBd09(lng, lat) {
+            const xPi = PI * 3000.0 / 180.0;
+            let z = Math.sqrt(lng * lng + lat * lat) + 0.00002 * Math.sin(lat * xPi);
+            let theta = Math.atan2(lat, lng) + 0.000003 * Math.cos(lng * xPi);
+            return [z * Math.cos(theta) + 0.0065, z * Math.sin(theta) + 0.006];
+        }
+
+        // BD09 -> GCJ02
+        function bd09ToGcj02(lng, lat) {
+            const xPi = PI * 3000.0 / 180.0;
+            let x = lng - 0.0065;
+            let y = lat - 0.006;
+            let z = Math.sqrt(x * x + y * y) - 0.00002 * Math.sin(y * xPi);
+            let theta = Math.atan2(y, x) - 0.000003 * Math.cos(x * xPi);
+            return [z * Math.cos(theta), z * Math.sin(theta)];
+        }
+
+        function formatCoord(lng, lat) {
+            return `${lng.toFixed(8)}, ${lat.toFixed(8)}`;
+        }
+
+        document.getElementById('convertBtn').addEventListener('click', function() {
+            const input = document.getElementById('inputCoords').value.trim();
+            const source = document.getElementById('sourceType').value;
+            const errorMsg = document.getElementById('errorMsg');
+            const results = document.getElementById('results');
+
+            errorMsg.textContent = '';
+            results.style.display = 'none';
+
+            if (!input) {
+                errorMsg.textContent = '请输入经纬度！';
+                return;
+            }
+
+            const parts = input.split(',');
+            if (parts.length !== 2) {
+                errorMsg.textContent = '格式错误，请输入“经度,纬度”';
+                return;
+            }
+
+            let lng = parseFloat(parts[0].trim());
+            let lat = parseFloat(parts[1].trim());
+
+            if (isNaN(lng) || isNaN(lat)) {
+                errorMsg.textContent = '经纬度必须为数字！';
+                return;
+            }
+
+            let gcjLng, gcjLat;
+            let wgsLng, wgsLat;
+            let bdLng, bdLat;
+
+            if (source === 'WGS84') {
+                [gcjLng, gcjLat] = wgs84ToGcj02(lng, lat);
+                [wgsLng, wgsLat] = [lng, lat];
+            } else if (source === 'GCJ02') {
+                [gcjLng, gcjLat] = [lng, lat];
+                [wgsLng, wgsLat] = gcj02ToWgs84(lng, lat);
+            } else { // BD09
+                [gcjLng, gcjLat] = bd09ToGcj02(lng, lat);
+                [wgsLng, wgsLat] = gcj02ToWgs84(gcjLng, gcjLat);
+            }
+
+            [bdLng, bdLat] = gcj02ToBd09(gcjLng, gcjLat);
+
+            document.getElementById('wgs84').textContent = formatCoord(wgsLng, wgsLat);
+            document.getElementById('gcj02').textContent = formatCoord(gcjLng, gcjLat);
+            document.getElementById('bd09').textContent = formatCoord(bdLng, bdLat);
+
+            results.style.display = 'block';
+        });
+
+        // 复制按钮
+        document.querySelectorAll('.copy-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const targetId = this.getAttribute('data-target');
+                const text = document.getElementById(targetId).textContent;
+                navigator.clipboard.writeText(text).then(() => {
+                    this.textContent = '已复制';
+                    setTimeout(() => { this.textContent = '复制'; }, 2000);
+                });
+            });
+        });
+    </script>
+</body>
+</html>

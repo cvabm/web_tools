@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="UTF-8">
+  <title>坐标拾取器（高德 / 百度 / WGS84）</title>
+  <style>
+    body { font-family: sans-serif; padding: 20px; text-align: center; background:#f8f8f8; }
+    h2 { color:#333; }
+    button { padding: 12px 24px; margin: 15px; font-size: 16px; cursor: pointer; border: none; border-radius: 6px; color:white; }
+    .amap { background:#00a0e9; }
+    .baidu { background:#ff6b00; }
+    .wgs84 { background:#4285f4; }
+    button:hover { opacity:0.9; }
+    p { margin: 30px; font-size: 18px; color:#555; }
+    .button-container {
+      display: flex;
+      justify-content: center;
+      gap: 5px;
+      flex-wrap: wrap;
+      margin: 10px 0;
+    }
+
+    ul { text-align:left; max-width:700px; margin:20px auto; background:white; padding:20px; border-radius:8px; box-shadow:0 2px 8px rgba(0,0,0,0.1); }
+  </style>
+</head>
+<body>
+  <h2>地图坐标拾取器</h2>
+  <p>点击按钮在新窗口打开对应坐标系的拾取工具，点击地图获取经纬度。</p>
+
+  <div class="button-container">
+    <button class="amap" onclick="window.open('https://lbs.amap.com/demo/javascript-api/example/geocoder/regeocoding', '_blank')">
+      高德地图（GCJ-02 坐标）
+    </button>
+    <button class="amap" onclick="window.open('https://lbs.amap.com/tools/picker', '_blank')">
+      高德备用2
+    </button>
+  </div>
+  <div class="button-container">
+    <button class="baidu" onclick="window.open('https://lbsyun.baidu.com/jsdemo.htm#xRevAddressParseSingle', '_blank')">
+      百度地图（BD-09 坐标）F12控制台日志获取，双击地图放大
+    </button>
+    <button class="baidu" onclick="window.open('https://lbs.baidu.com/maptool/getpoint', '_blank')">
+      百度备用2
+    </button>
+  </div>
+
+  <button class="wgs84" onclick="window.open('https://www.keene.edu/campus/maps/tool/', '_blank')">
+    WGS-84（原始GPS坐标）右击点位显示
+  </button>
+
+  <p>使用说明：</p>
+  <ul>
+    <li><strong>高德地图</strong>：返回 GCJ-02（火星坐标），国内大多数App和高德API使用此坐标。</li>
+    <li><strong>百度地图</strong>：返回 BD-09（百度专用坐标），比GCJ-02再偏移一层，仅百度地图使用。</li>
+    <li><strong>WGS-84</strong>：返回真实GPS坐标（国际标准），国外地图（如Google Maps）和原始GPS设备使用。中国境内显示会有几百米偏移（因国家规定）。</li>
+    <li>拾取后复制坐标，可用之前的“坐标转换工具”互相转换。</li>
+    <li>推荐精度：小数点后6位（约0.1米）。</li>
+  </ul>
+
+  <p>如需更精确的WGS-84拾取，也可在境外使用 Google Maps 右键 → “这是什么位置？”</p>
+</body>
+</html>
