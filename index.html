@@ -1,9 +1,10 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Navigation Menu</title>
+    <title>工具导航</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         body {
@@ -12,44 +13,58 @@
         }
     </style>
 </head>
+
 <body class="flex flex-col items-center min-h-screen p-4">
-    <h1 class="text-2xl font-bold mb-10">Navigation Menu</h1>
-	  <div class="flex flex-col space-y-4 sm:flex-row sm:space-y-0 sm:space-x-4">
-        <a href="./note.html" target="_blank" 
-           class="bg-blue-500 text-white px-6 py-2 rounded hover:bg-blue-600 text-center">记事本</a>
-		    <a href="./software.html" target="_blank" 
-           class="bg-blue-500 text-white px-6 py-2 rounded hover:bg-blue-600 text-center">常用软件</a>
+    <h1 class="text-2xl font-bold mb-10">常用工具</h1>
+    <div class="flex flex-col space-y-4 sm:flex-row sm:space-y-0 sm:space-x-4">
+        <a href="./note.html" target="_blank"
+            class="bg-blue-500 text-white px-6 py-2 rounded hover:bg-blue-600 text-center">记事本</a>
+        <a href="./software.html" target="_blank"
+            class="bg-blue-500 text-white px-6 py-2 rounded hover:bg-blue-600 text-center">常用软件</a>
     </div>
     <div class="flex flex-col space-y-4 sm:flex-row sm:space-y-0 sm:space-x-4 mt-6">
-        <a href="./sdp_formatter.html" target="_blank" 
-           class="bg-green-500 text-white px-6 py-2 rounded hover:bg-green-600 text-center">SdpFormatter</a>
-           <a href="./patch_viewer.html" target="_blank" 
-           class="bg-green-500 text-white px-6 py-2 rounded hover:bg-green-600 text-center">PatchViewer</a>
-           <a href="./coordinate_picker.html" target="_blank" 
-           class="bg-green-500 text-white px-6 py-2 rounded hover:bg-green-600 text-center">坐标拾取器</a>
-           <a href="./coordinate_convert.html" target="_blank" 
-           class="bg-green-500 text-white px-6 py-2 rounded hover:bg-green-600 text-center">经纬度转换</a>
+        <a href="./sdp_formatter.html" target="_blank"
+            class="bg-green-500 text-white px-6 py-2 rounded hover:bg-green-600 text-center">SdpFormatter</a>
+        <a href="./patch_viewer.html" target="_blank"
+            class="bg-green-500 text-white px-6 py-2 rounded hover:bg-green-600 text-center">PatchViewer</a>
+        <a href="./coordinate_picker.html" target="_blank"
+            class="bg-green-500 text-white px-6 py-2 rounded hover:bg-green-600 text-center">坐标拾取器</a>
+        <a href="./coordinate_convert.html" target="_blank"
+            class="bg-green-500 text-white px-6 py-2 rounded hover:bg-green-600 text-center">经纬度转换</a>
     </div>
     <div class="flex flex-col space-y-4 sm:flex-row sm:space-y-0 sm:space-x-4 mt-6">
-		    <a href="./change_img_color.html" target="_blank" 
-           class="bg-cyan-500 text-white px-6 py-2 rounded hover:bg-cyan-600 text-center">修改图片颜色</a>
-		      <a href="./change_img_color_higher.html" target="_blank" 
-           class="bg-cyan-500 text-white px-6 py-2 rounded hover:bg-cyan-600 text-center">修改图片颜色(多色值)</a>
+        <a href="./change_img_color.html" target="_blank"
+            class="bg-cyan-500 text-white px-6 py-2 rounded hover:bg-cyan-600 text-center">修改图片颜色</a>
+        <a href="./change_img_color_higher.html" target="_blank"
+            class="bg-cyan-500 text-white px-6 py-2 rounded hover:bg-cyan-600 text-center">修改图片颜色(多色值)</a>
     </div>
 
     <div class="flex flex-col space-y-4 sm:flex-row sm:space-y-0 sm:space-x-4 mt-6">
-        <a href="./caller.html" target="_blank" 
-           class="bg-pink-500 text-white px-6 py-2 rounded hover:bg-pink-600 text-center">WebRTC Caller</a>
-        <a href="./callee.html" target="_blank" 
-           class="bg-pink-500 text-white px-6 py-2 rounded hover:bg-pink-600 text-center">WebRTC Callee</a>
+        <a href="./caller.html" target="_blank"
+            class="bg-pink-500 text-white px-6 py-2 rounded hover:bg-pink-600 text-center">WebRTC Caller</a>
+        <a href="./callee.html" target="_blank"
+            class="bg-pink-500 text-white px-6 py-2 rounded hover:bg-pink-600 text-center">WebRTC Callee</a>
     </div>
+
+
+    <h2 class="text-xl font-semibold mb-4" style="margin-top: 40px;">Android工具</h2>
+    <div class="flex flex-col space-y-4 sm:flex-row sm:space-y-0 sm:space-x-4">
+        <a href="https://hateum.github.io/AndroidDrawableGenerator/" target="_blank"
+            class="bg-blue-500 text-white px-6 py-2 rounded hover:bg-blue-600 text-center">原生按钮制作器</a>
+    </div>
+
+
     <div class="mt-8">
-        <h2 class="text-xl font-semibold mb-4">Articles</h2>
+        <h2 class="text-xl font-semibold mb-4">思维导图</h2>
         <ul class="list-disc pl-6 space-y-2">
-            <li><a href="https://www.processon.com/view/link/68da1c22a225f06bfcab1464" target="_blank" class="text-blue-600 hover:underline">Android各功能实现</a></li>
-            <li><a href="https://www.processon.com/view/link/68da1c6975ec317b6333d584" target="_blank" class="text-blue-600 hover:underline">Android知识</a></li>
-            <li><a href="https://www.processon.com/view/link/68da1c77e6f1662eda99af69" target="_blank" class="text-blue-600 hover:underline">JAVA</a></li>
+            <li><a href="https://www.processon.com/view/link/68da1c22a225f06bfcab1464" target="_blank"
+                    class="text-blue-600 hover:underline">Android各功能实现</a></li>
+            <li><a href="https://www.processon.com/view/link/68da1c6975ec317b6333d584" target="_blank"
+                    class="text-blue-600 hover:underline">Android知识</a></li>
+            <li><a href="https://www.processon.com/view/link/68da1c77e6f1662eda99af69" target="_blank"
+                    class="text-blue-600 hover:underline">JAVA</a></li>
         </ul>
     </div>
 </body>
+
 </html>
