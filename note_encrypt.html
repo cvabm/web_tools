@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>云便签 - 全局进入密码版</title>
+    <style>
+        body { margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: #f8f9fa; color: #333; display: flex; flex-direction: column; height: 100vh; }
+        header { background: #fff; border-bottom: 1px solid #eee; padding: 20px; text-align: center; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
+        h1 { margin: 0; font-size: 24px; font-weight: 500; }
+        
+        .status-bar { margin-top: 10px; font-size: 18px; font-weight: bold; }
+        .status-name { color: #007bff; }
+        
+        #main { display: flex; flex: 1; overflow: hidden; }
+        #sidebar { width: 260px; background: #fff; border-right: 1px solid #eee; overflow-y: auto; }
+        #note-list { list-style: none; margin: 0; padding: 0; }
+        #note-list li { 
+            padding: 14px 20px; 
+            border-bottom: 1px solid #eee; 
+            cursor: pointer; 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center;
+            user-select: none;
+        }
+        #note-list li:hover { background: #f1f3f5; }
+        #note-list li.active { background: #e3f2fd; font-weight: bold; }
+        #note-list li .delete { 
+            color: #dc3545; 
+            font-size: 18px; 
+            font-weight: bold;
+            width: 30px;
+            text-align: center;
+            opacity: 0; 
+            transition: opacity 0.2s; 
+        }
+        #note-list li:hover .delete { opacity: 1; }
+
+        #content { flex: 1; display: flex; flex-direction: column; }
+        #editor { flex: 1; padding: 20px; border: none; outline: none; font-size: 16px; line-height: 1.6; resize: none; background: #fff; }
+        
+        #new-note { margin: 20px; display: flex; }
+        #name-input { flex: 1; padding: 12px; font-size: 16px; border: 1px solid #ddd; border-radius: 8px 0 0 8px; }
+        #add-btn { padding: 12px 20px; background: #007bff; color: white; border: none; border-radius: 0 8px 8px 0; cursor: pointer; }
+        
+        .overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); display: flex; align-items: center; justify-content: center; z-index: 100; flex-direction: column; color: white; }
+        .dialog { background: white; color: #333; padding: 40px; border-radius: 12px; width: 90%; max-width: 400px; box-shadow: 0 10px 30px rgba(0,0,0,0.4); text-align: center; }
+        input[type="password"], input[type="text"] { width: 100%; padding: 14px; margin: 15px 0; font-size: 18px; border: 1px solid #ccc; border-radius: 8px; box-sizing: border-box; }
+        button { padding: 12px 24px; margin: 10px 5px; background: #007bff; color: white; border: none; border-radius: 8px; cursor: pointer; font-size: 16px; }
+        button.secondary { background: #6c757d; }
+        
+        .hidden { display: none !important; }
+        
+        footer { text-align: center; padding: 10px; font-size: 12px; color: #999; background: #fff; border-top: 1px solid #eee; }
+        #change-password-btn { font-size: 12px; margin-top: 10px; }
+    </style>
+</head>
+<body>
+
+    <div id="master-password-overlay" class="overlay">
+        <div class="dialog">
+            <h2>请输入进入密码</h2>
+            <p style="color:#666; margin-bottom:20px;">保护你的所有便签</p>
+            <input type="password" id="master-password-input" placeholder="输入密码">
+            <button id="enter-btn">进入</button>
+            <div style="margin-top:30px; font-size:14px; color:#999;">
+                首次使用？直接设置密码后点击进入
+            </div>
+        </div>
+    </div>
+
+    <div id="change-password-overlay" class="overlay hidden">
+        <div class="dialog">
+            <h2>修改进入密码</h2>
+            <input type="password" id="old-pass" placeholder="当前密码">
+            <input type="password" id="new-pass1" placeholder="新密码">
+            <input type="password" id="new-pass2" placeholder="再次输入新密码">
+            <div style="margin-top:20px;">
+                <button id="change-confirm">确认修改</button>
+                <button class="secondary" id="change-cancel">取消</button>
+            </div>
+            <p id="change-hint" style="color:#e74c3c; margin-top:10px; display:none;">密码不一致或当前密码错误！</p>
+        </div>
+    </div>
+
+    <div id="main-app" class="hidden">
+        <header>
+            <h1>云便签</h1>
+            <div class="status-bar">
+                当前便签: <span id="current-name" class="status-name">默认</span>
+            </div>
+            <button id="change-password-btn">修改进入密码</button>
+        </header>
+
+        <div id="main">
+            <div id="sidebar">
+                <div id="new-note">
+                    <input type="text" id="name-input" placeholder="新建便签名字">
+                    <button id="add-btn">+</button>
+                </div>
+                <ul id="note-list"></ul>
+            </div>
+            
+            <div id="content">
+                <textarea id="editor" placeholder="开始书写你的内容吧...\n所有便签自动保存，本地存储。"></textarea>
+            </div>
+        </div>
+
+        <footer>本地存储 · 全局进入密码保护 · 纯前端实现</footer>
+    </div>
+
+    <script>
+        const masterOverlay = document.getElementById('master-password-overlay');
+        const changeOverlay = document.getElementById('change-password-overlay');
+        const mainApp = document.getElementById('main-app');
+        const enterBtn = document.getElementById('enter-btn');
+        const masterInput = document.getElementById('master-password-input');
+        const changeBtn = document.getElementById('change-password-btn');
+
+        const editor = document.getElementById('editor');
+        const nameInput = document.getElementById('name-input');
+        const addBtn = document.getElementById('add-btn');
+        const currentNameSpan = document.getElementById('current-name');
+        const noteList = document.getElementById('note-list');
+
+        let currentNoteName = '默认';
+        const MASTER_KEY = 'master_password';
+
+        function checkMasterPassword() {
+            const saved = localStorage.getItem(MASTER_KEY);
+            if (!saved) {
+                masterInput.focus();
+                return;
+            }
+            masterInput.focus();
+        }
+
+        function enterApp() {
+            const input = masterInput.value.trim();
+            const saved = localStorage.getItem(MASTER_KEY);
+
+            if (!saved) {
+                if (input === '') {
+                    alert('请输入密码！');
+                    return;
+                }
+                localStorage.setItem(MASTER_KEY, input);
+            } else {
+                if (input !== saved) {
+                    alert('密码错误！');
+                    masterInput.value = '';
+                    masterInput.focus();
+                    return;
+                }
+            }
+
+            masterOverlay.classList.add('hidden');
+            mainApp.classList.remove('hidden');
+            loadNote();
+        }
+
+        enterBtn.onclick = enterApp;
+        masterInput.addEventListener('keydown', e => {
+            if (e.key === 'Enter') enterApp();
+        });
+
+        function getAllNotes() {
+            const notes = new Set();
+            for (let i = 0; i < localStorage.length; i++) {
+                const key = localStorage.key(i);
+                if (key.startsWith('note_') && key.endsWith('_content') && key !== MASTER_KEY) {
+                    const name = key.slice(5, -8);
+                    notes.add(name);
+                }
+            }
+            return Array.from(notes).sort();
+        }
+
+        function refreshNoteList() {
+            noteList.innerHTML = '';
+            const notes = getAllNotes();
+            if (notes.length === 0) {
+                noteList.innerHTML = '<li style="padding:20px; color:#999; text-align:center;">暂无便签，创建第一个吧！</li>';
+                return;
+            }
+            notes.forEach(name => {
+                const li = document.createElement('li');
+                li.innerHTML = `
+                    <span class="note-name">${name}</span>
+                    <span class="delete" title="删除">×</span>
+                `;
+                if (name === currentNoteName) li.classList.add('active');
+
+                li.addEventListener('click', (e) => {
+                    if (e.target.classList.contains('delete')) return;
+                    switchNote(name);
+                });
+
+                li.querySelector('.delete').addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    if (confirm(`确定删除便签 "${name}" 吗？`)) {
+                        localStorage.removeItem(`note_${name}_content`);
+                        if (name === currentNoteName) switchNote('默认');
+                        refreshNoteList();
+                    }
+                });
+
+                noteList.appendChild(li);
+            });
+        }
+
+        function loadNote() {
+            const content = localStorage.getItem(`note_${currentNoteName}_content`) || '';
+            editor.value = content;
+            currentNameSpan.textContent = currentNoteName;
+            refreshNoteList();
+        }
+
+        function saveNote() {
+            localStorage.setItem(`note_${currentNoteName}_content`, editor.value);
+        }
+
+        function switchNote(name) {
+            saveNote();
+            currentNoteName = name;
+            loadNote();
+        }
+
+        addBtn.onclick = () => {
+            let name = nameInput.value.trim();
+            if (!name) return alert('请输入名字！');
+            if (getAllNotes().includes(name)) return alert('已存在！');
+            nameInput.value = '';
+            switchNote(name);
+        };
+        nameInput.addEventListener('keydown', e => {
+            if (e.key === 'Enter') addBtn.click();
+        });
+
+        editor.addEventListener('input', saveNote);
+
+        changeBtn.onclick = () => {
+            changeOverlay.classList.remove('hidden');
+            document.getElementById('old-pass').value = '';
+            document.getElementById('new-pass1').value = '';
+            document.getElementById('new-pass2').value = '';
+        };
+
+        document.getElementById('change-cancel').onclick = () => {
+            changeOverlay.classList.add('hidden');
+        };
+
+        document.getElementById('change-confirm').onclick = () => {
+            const old = document.getElementById('old-pass').value;
+            const p1 = document.getElementById('new-pass1').value;
+            const p2 = document.getElementById('new-pass2').value;
+            const saved = localStorage.getItem(MASTER_KEY);
+
+            if (old !== saved) {
+                document.getElementById('change-hint').textContent = '当前密码错误！';
+                document.getElementById('change-hint').style.display = 'block';
+                return;
+            }
+            if (p1 !== p2) {
+                document.getElementById('change-hint').textContent = '两次新密码不一致！';
+                document.getElementById('change-hint').style.display = 'block';
+                return;
+            }
+            if (p1 === '') {
+                alert('密码不能为空！');
+                return;
+            }
+
+            localStorage.setItem(MASTER_KEY, p1);
+            changeOverlay.classList.add('hidden');
+            alert('进入密码修改成功！');
+        };
+
+        checkMasterPassword();
+    </script>
+</body>
+</html>
