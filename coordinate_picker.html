@@ -1,62 +1,231 @@
 <!DOCTYPE html>
-<html lang="zh">
+<html lang="zh-CN">
 <head>
   <meta charset="UTF-8">
-  <title>坐标拾取器（高德 / 百度 / WGS84）</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>坐标拾取器</title>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500&display=swap" rel="stylesheet">
   <style>
-    body { font-family: sans-serif; padding: 20px; text-align: center; background:#f8f8f8; }
-    h2 { color:#333; }
-    button { padding: 12px 24px; margin: 15px; font-size: 16px; cursor: pointer; border: none; border-radius: 6px; color:white; }
-    .amap { background:#00a0e9; }
-    .baidu { background:#ff6b00; }
-    .wgs84 { background:#4285f4; }
-    button:hover { opacity:0.9; }
-    p { margin: 30px; font-size: 18px; color:#555; }
-    .button-container {
-      display: flex;
-      justify-content: center;
-      gap: 5px;
-      flex-wrap: wrap;
-      margin: 10px 0;
+    :root {
+      --bg: #0f1117;
+      --surface: #1a1d27;
+      --border: #2a2d3e;
+      --text: #e8eaf0;
+      --text-dim: #6b7280;
+      --amap: #00a0e9;
+      --baidu: #ff6b00;
+      --wgs84: #4285f4;
     }
 
-    ul { text-align:left; max-width:700px; margin:20px auto; background:white; padding:20px; border-radius:8px; box-shadow:0 2px 8px rgba(0,0,0,0.1); }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: 'Noto Sans SC', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      padding: 48px 24px;
+    }
+
+    header {
+      text-align: center;
+      margin-bottom: 48px;
+    }
+
+    header h1 {
+      font-size: 1.5rem;
+      font-weight: 300;
+      letter-spacing: 0.3em;
+      color: var(--text-dim);
+      text-transform: uppercase;
+    }
+
+    header h1 span { color: #6366f1; }
+
+    header p {
+      margin-top: 10px;
+      font-size: 0.8rem;
+      color: var(--text-dim);
+      letter-spacing: 0.05em;
+    }
+
+    .container {
+      max-width: 680px;
+      margin: 0 auto;
+    }
+
+    /* ── 坐标系分组 ── */
+    .group {
+      margin-bottom: 28px;
+    }
+
+    .group-label {
+      font-size: 0.68rem;
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+      color: var(--text-dim);
+      margin-bottom: 10px;
+      padding-left: 2px;
+    }
+
+    .buttons {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 9px 18px;
+      border-radius: 6px;
+      border: 1px solid var(--border);
+      background: var(--surface);
+      color: var(--text);
+      font-size: 0.85rem;
+      font-family: inherit;
+      cursor: pointer;
+      text-align: left;
+      transition: background 0.15s, border-color 0.15s, transform 0.1s;
+    }
+
+    .btn .dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+
+    .btn-note {
+      font-size: 0.72rem;
+      color: var(--text-dim);
+    }
+
+    .btn.amap  .dot { background: var(--amap); }
+    .btn.baidu .dot { background: var(--baidu); }
+    .btn.wgs84 .dot { background: var(--wgs84); }
+
+    .btn:hover { background: #1e2130; transform: translateY(-1px); }
+    .btn.amap:hover  { border-color: var(--amap); }
+    .btn.baidu:hover { border-color: var(--baidu); }
+    .btn.wgs84:hover { border-color: var(--wgs84); }
+
+    /* ── 说明卡片 ── */
+    hr {
+      border: none;
+      border-top: 1px solid var(--border);
+      margin: 36px 0;
+    }
+
+    .notes {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .note-item {
+      display: flex;
+      gap: 14px;
+      padding: 14px 16px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      font-size: 0.82rem;
+      line-height: 1.6;
+      color: var(--text-dim);
+    }
+
+    .note-item .tag {
+      font-size: 0.7rem;
+      font-weight: 500;
+      letter-spacing: 0.1em;
+      white-space: nowrap;
+      padding-top: 2px;
+    }
+
+    .tag.amap  { color: var(--amap); }
+    .tag.baidu { color: var(--baidu); }
+    .tag.wgs84 { color: var(--wgs84); }
+    .tag.tip   { color: #6366f1; }
+
+    .note-item strong { color: var(--text); font-weight: 500; }
   </style>
 </head>
 <body>
-  <h2>地图坐标拾取器</h2>
-  <p>点击按钮在新窗口打开对应坐标系的拾取工具，点击地图获取经纬度。</p>
 
-  <div class="button-container">
-    <button class="amap" onclick="window.open('https://lbs.amap.com/demo/javascript-api/example/geocoder/regeocoding', '_blank')">
-      高德地图（GCJ-02 坐标）
-    </button>
-    <button class="amap" onclick="window.open('https://lbs.amap.com/tools/picker', '_blank')">
-      高德备用2
-    </button>
+<header>
+  <h1>坐标<span>拾取器</span></h1>
+  <p>点击按钮在新窗口打开对应坐标系的拾取工具</p>
+</header>
+
+<div class="container">
+
+  <!-- 高德 GCJ-02 -->
+  <div class="group">
+    <div class="group-label">高德地图 · GCJ-02 火星坐标</div>
+    <div class="buttons">
+      <button class="btn amap" onclick="window.open('https://lbs.amap.com/tools/picker', '_blank')">
+        <span class="dot"></span>
+        高德拾取器
+      </button>
+      <button class="btn amap" onclick="window.open('https://lbs.amap.com/demo/javascript-api/example/geocoder/regeocoding', '_blank')">
+        <span class="dot"></span>
+        高德备用
+      </button>
+    </div>
   </div>
-  <div class="button-container">
-    <button class="baidu" onclick="window.open('https://lbsyun.baidu.com/jsdemo.htm#xRevAddressParseSingle', '_blank')">
-      百度地图（BD-09 坐标）F12控制台日志获取，双击地图放大
-    </button>
-    <button class="baidu" onclick="window.open('https://lbs.baidu.com/maptool/getpoint', '_blank')">
-      百度备用2
-    </button>
+
+  <!-- 百度 BD-09 -->
+  <div class="group">
+    <div class="group-label">百度地图 · BD-09 百度坐标</div>
+    <div class="buttons">
+      <button class="btn baidu" onclick="window.open('https://lbs.baidu.com/maptool/getpoint', '_blank')">
+        <span class="dot"></span>
+        百度拾取器
+      </button>
+      <button class="btn baidu" onclick="window.open('https://lbsyun.baidu.com/jsdemo.htm#xRevAddressParseSingle', '_blank')">
+        <span class="dot"></span>
+        百度备用
+        <span class="btn-note">（F12 控制台，双击放大）</span>
+      </button>
+    </div>
   </div>
 
-  <button class="wgs84" onclick="window.open('https://www.keene.edu/campus/maps/tool/', '_blank')">
-    WGS-84（原始GPS坐标）右击点位显示
-  </button>
+  <!-- WGS-84 -->
+  <div class="group">
+    <div class="group-label">WGS-84 · 原始 GPS 坐标</div>
+    <div class="buttons">
+      <button class="btn wgs84" onclick="window.open('https://www.keene.edu/campus/maps/tool/', '_blank')">
+        <span class="dot"></span>
+        WGS-84 拾取器
+        <span class="btn-note">（右击点位显示）</span>
+      </button>
+    </div>
+  </div>
 
-  <p>使用说明：</p>
-  <ul>
-    <li><strong>高德地图</strong>：返回 GCJ-02（火星坐标），国内大多数App和高德API使用此坐标。</li>
-    <li><strong>百度地图</strong>：返回 BD-09（百度专用坐标），比GCJ-02再偏移一层，仅百度地图使用。</li>
-    <li><strong>WGS-84</strong>：返回真实GPS坐标（国际标准），国外地图（如Google Maps）和原始GPS设备使用。中国境内显示会有几百米偏移（因国家规定）。</li>
-    <li>拾取后复制坐标，可用之前的“坐标转换工具”互相转换。</li>
-    <li>推荐精度：小数点后6位（约0.1米）。</li>
-  </ul>
+  <hr>
 
-  <p>如需更精确的WGS-84拾取，也可在境外使用 Google Maps 右键 → “这是什么位置？”</p>
+  <!-- 说明 -->
+  <div class="notes">
+    <div class="note-item">
+      <span class="tag amap">GCJ-02</span>
+      <span>国内大多数 App 和高德 API 使用的<strong>火星坐标</strong>，在 WGS-84 基础上做了偏移加密。</span>
+    </div>
+    <div class="note-item">
+      <span class="tag baidu">BD-09</span>
+      <span><strong>百度专用坐标</strong>，在 GCJ-02 基础上再次偏移，仅百度地图体系使用。</span>
+    </div>
+    <div class="note-item">
+      <span class="tag wgs84">WGS-84</span>
+      <span>真实 GPS 国际标准坐标，Google Maps、原始 GPS 设备使用。<strong>中国境内显示会有几百米偏移</strong>（因国家规定）。</span>
+    </div>
+    <div class="note-item">
+      <span class="tag tip">提示</span>
+      <span>拾取后可使用<strong>坐标转换工具</strong>互相转换。推荐精度：小数点后 6 位（约 0.1 米）。境外精确 WGS-84 也可在 Google Maps 右键 →「这是什么位置？」</span>
+    </div>
+  </div>
+
+</div>
 </body>
 </html>

@@ -1,72 +1,210 @@
 <!DOCTYPE html>
-<html lang="en">
-
+<html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>工具导航</title>
-    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;700&display=swap" rel="stylesheet">
     <style>
+        :root {
+            --bg: #0f1117;
+            --surface: #1a1d27;
+            --border: #2a2d3e;
+            --text: #e8eaf0;
+            --text-dim: #6b7280;
+            --accent: #6366f1;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
         body {
-            font-family: Arial, sans-serif;
-            background-color: #f3f4f6;
+            font-family: 'Noto Sans SC', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            padding: 48px 24px;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 56px;
+        }
+
+        header h1 {
+            font-size: 1.6rem;
+            font-weight: 300;
+            letter-spacing: 0.3em;
+            color: var(--text-dim);
+            text-transform: uppercase;
+        }
+
+        header h1 span {
+            color: var(--accent);
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        /* ─── 分组 ─────────────────────────────── */
+        .group {
+            margin-bottom: 40px;
+        }
+
+        .group-label {
+            font-size: 0.7rem;
+            font-weight: 500;
+            letter-spacing: 0.25em;
+            text-transform: uppercase;
+            color: var(--text-dim);
+            margin-bottom: 12px;
+            padding-left: 4px;
+        }
+
+        .links {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        /* ─── 按钮式链接 ─────────────────────────── */
+        a.btn {
+            display: inline-block;
+            padding: 8px 18px;
+            border-radius: 6px;
+            font-size: 0.875rem;
+            font-weight: 400;
+            text-decoration: none;
+            border: 1px solid var(--border);
+            background: var(--surface);
+            color: var(--text);
+            transition: background 0.15s, border-color 0.15s, color 0.15s, transform 0.1s;
+        }
+
+        a.btn:hover {
+            background: var(--accent);
+            border-color: var(--accent);
+            color: #fff;
+            transform: translateY(-1px);
+        }
+
+        /* ─── 列表式链接（思维导图用） ───────────── */
+        .link-list {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        a.list-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 16px;
+            border-radius: 6px;
+            border: 1px solid var(--border);
+            background: var(--surface);
+            color: var(--text);
+            text-decoration: none;
+            font-size: 0.875rem;
+            transition: background 0.15s, border-color 0.15s, transform 0.1s;
+        }
+
+        a.list-item:hover {
+            background: #1e2130;
+            border-color: var(--accent);
+            transform: translateX(3px);
+        }
+
+        a.list-item::before {
+            content: '↗';
+            font-size: 0.75rem;
+            color: var(--accent);
+            opacity: 0.7;
+        }
+
+        /* ─── 分隔线 ─────────────────────────────── */
+        hr {
+            border: none;
+            border-top: 1px solid var(--border);
+            margin: 40px 0;
         }
     </style>
 </head>
+<body>
 
-<body class="flex flex-col items-center min-h-screen p-4">
-    <h1 class="text-2xl font-bold mb-10">常用工具</h1>
-    <div class="flex flex-col space-y-4 sm:flex-row sm:space-y-0 sm:space-x-4">
-        <a href="./note.html" target="_blank"
-            class="bg-blue-500 text-white px-6 py-2 rounded hover:bg-blue-600 text-center">记事本</a>
-            <a href="./note_encrypt.html" target="_blank"
-            class="bg-blue-500 text-white px-6 py-2 rounded hover:bg-blue-600 text-center">记事本(加密)</a>
-        <a href="./software.html" target="_blank"
-            class="bg-blue-500 text-white px-6 py-2 rounded hover:bg-blue-600 text-center">常用软件</a>
-    </div>
-    <div class="flex flex-col space-y-4 sm:flex-row sm:space-y-0 sm:space-x-4 mt-6">
-        <a href="./sdp_formatter.html" target="_blank"
-            class="bg-green-500 text-white px-6 py-2 rounded hover:bg-green-600 text-center">SdpFormatter</a>
-        <a href="./patch_viewer.html" target="_blank"
-            class="bg-green-500 text-white px-6 py-2 rounded hover:bg-green-600 text-center">PatchViewer</a>
-        <a href="./coordinate_picker.html" target="_blank"
-            class="bg-green-500 text-white px-6 py-2 rounded hover:bg-green-600 text-center">坐标拾取器</a>
-        <a href="./coordinate_convert.html" target="_blank"
-            class="bg-green-500 text-white px-6 py-2 rounded hover:bg-green-600 text-center">经纬度转换</a>
-    </div>
-    <div class="flex flex-col space-y-4 sm:flex-row sm:space-y-0 sm:space-x-4 mt-6">
-        <a href="./change_img_color.html" target="_blank"
-            class="bg-cyan-500 text-white px-6 py-2 rounded hover:bg-cyan-600 text-center">修改图片颜色</a>
-        <a href="./change_img_color_higher.html" target="_blank"
-            class="bg-cyan-500 text-white px-6 py-2 rounded hover:bg-cyan-600 text-center">修改图片颜色(多色值)</a>
+<header>
+    <h1>工具<span>导航</span></h1>
+</header>
+
+<div class="container">
+
+    <!-- ══════════════════════════════════════════════
+         ★ 如何增删链接：
+           - 增加：在对应 .links 里复制一行 <a> 标签，改 href 和文字即可
+           - 删除：把对应的 <a> 标签整行删掉
+           - 新建分组：复制一个 <div class="group"> ... </div> 块
+    ══════════════════════════════════════════════ -->
+
+    <!-- 分组：常用工具 -->
+    <div class="group">
+        <div class="group-label">常用工具</div>
+        <div class="links">
+            <a href="./note.html" target="_blank" class="btn">记事本</a>
+            <a href="./note_encrypt.html" target="_blank" class="btn">记事本（加密）</a>
+            <a href="./software.html" target="_blank" class="btn">常用软件</a>
+        </div>
     </div>
 
-    <div class="flex flex-col space-y-4 sm:flex-row sm:space-y-0 sm:space-x-4 mt-6">
-        <a href="./caller.html" target="_blank"
-            class="bg-pink-500 text-white px-6 py-2 rounded hover:bg-pink-600 text-center">WebRTC Caller</a>
-        <a href="./callee.html" target="_blank"
-            class="bg-pink-500 text-white px-6 py-2 rounded hover:bg-pink-600 text-center">WebRTC Callee</a>
+    <!-- 分组：开发工具 -->
+    <div class="group">
+        <div class="group-label">开发工具</div>
+        <div class="links">
+            <a href="./sdp_formatter.html" target="_blank" class="btn">SDP Formatter</a>
+            <a href="./patch_viewer.html" target="_blank" class="btn">Patch Viewer</a>
+            <a href="./coordinate_picker.html" target="_blank" class="btn">坐标拾取器</a>
+            <a href="./coordinate_convert.html" target="_blank" class="btn">经纬度转换</a>
+        </div>
     </div>
 
-
-    <h2 class="text-xl font-semibold mb-4" style="margin-top: 40px;">Android工具</h2>
-    <div class="flex flex-col space-y-4 sm:flex-row sm:space-y-0 sm:space-x-4">
-        <a href="https://hateum.github.io/AndroidDrawableGenerator/" target="_blank"
-            class="bg-blue-500 text-white px-6 py-2 rounded hover:bg-blue-600 text-center">原生按钮制作器</a>
+    <!-- 分组：图片处理 -->
+    <div class="group">
+        <div class="group-label">图片处理</div>
+        <div class="links">
+            <a href="./change_img_color.html" target="_blank" class="btn">修改图片颜色</a>
+            <a href="./change_img_color_higher.html" target="_blank" class="btn">修改图片颜色（多色值）</a>
+        </div>
     </div>
 
-
-    <div class="mt-8">
-        <h2 class="text-xl font-semibold mb-4">思维导图</h2>
-        <ul class="list-disc pl-6 space-y-2">
-            <li><a href="https://www.processon.com/view/link/68da1c22a225f06bfcab1464" target="_blank"
-                    class="text-blue-600 hover:underline">Android各功能实现</a></li>
-            <li><a href="https://www.processon.com/view/link/68da1c6975ec317b6333d584" target="_blank"
-                    class="text-blue-600 hover:underline">Android知识</a></li>
-            <li><a href="https://www.processon.com/view/link/68da1c77e6f1662eda99af69" target="_blank"
-                    class="text-blue-600 hover:underline">JAVA</a></li>
-        </ul>
+    <!-- 分组：WebRTC -->
+    <div class="group">
+        <div class="group-label">WebRTC</div>
+        <div class="links">
+            <a href="./caller.html" target="_blank" class="btn">Caller</a>
+            <a href="./callee.html" target="_blank" class="btn">Callee</a>
+        </div>
     </div>
+
+    <!-- 分组：Android 工具 -->
+    <div class="group">
+        <div class="group-label">Android 工具</div>
+        <div class="links">
+            <a href="https://hateum.github.io/AndroidDrawableGenerator/" target="_blank" class="btn">原生按钮制作器</a>
+        </div>
+    </div>
+
+    <hr>
+
+    <!-- 分组：思维导图 -->
+    <div class="group">
+        <div class="group-label">思维导图</div>
+        <div class="link-list">
+            <a href="https://www.processon.com/view/link/68da1c22a225f06bfcab1464" target="_blank" class="list-item">Android 各功能实现</a>
+            <a href="https://www.processon.com/view/link/68da1c6975ec317b6333d584" target="_blank" class="list-item">Android 知识</a>
+            <a href="https://www.processon.com/view/link/68da1c77e6f1662eda99af69" target="_blank" class="list-item">JAVA</a>
+        </div>
+    </div>
+
+</div>
 </body>
-
 </html>
