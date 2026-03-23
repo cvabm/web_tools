@@ -1,0 +1,584 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>JSON 工具</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+  font-family: 'Segoe UI', system-ui, sans-serif;
+  background: #f0f2f5; height: 100vh;
+  display: flex; flex-direction: column; overflow: hidden;
+}
+.topbar {
+  background: #fff; border-bottom: 1px solid #e0e0e0;
+  padding: 0 16px; height: 48px;
+  display: flex; align-items: center; gap: 8px; flex-shrink: 0;
+}
+.topbar h1 { font-size: 15px; font-weight: 600; color: #333; margin-right: 8px; }
+.btn {
+  padding: 6px 14px; font-size: 13px; border-radius: 4px;
+  border: 1px solid #d0d0d0; background: #fff;
+  cursor: pointer; color: #444; white-space: nowrap; transition: background 0.1s;
+}
+.btn:hover { background: #f5f5f5; }
+.btn.primary { background: #1677ff; color: #fff; border-color: #1677ff; }
+.btn.primary:hover { background: #4096ff; }
+.btn.danger  { background: #fff1f0; color: #ff4d4f; border-color: #ffa39e; }
+.btn.success { background: #f6ffed; color: #52c41a; border-color: #b7eb8f; }
+.sep { width: 1px; height: 24px; background: #e8e8e8; margin: 0 4px; }
+.statusbar {
+  padding: 0 16px; font-size: 12px; display: flex; align-items: center; gap: 16px;
+  background: #fff; border-bottom: 1px solid #e8e8e8; flex-shrink: 0; height: 32px;
+}
+.s-ok   { color: #52c41a; font-weight: 500; }
+.s-err  { color: #ff4d4f; font-weight: 500; }
+.s-warn { color: #d46b08; font-weight: 500; }
+.s-idle { color: #999; }
+.s-meta { color: #888; font-size: 11px; }
+.main { display: flex; flex: 1; overflow: hidden; gap: 1px; background: #e0e0e0; }
+.pane { display: flex; flex-direction: column; background: #fff; flex: 1; overflow: hidden; }
+.pane-header {
+  padding: 8px 12px; font-size: 12px; color: #888; background: #fafafa;
+  border-bottom: 1px solid #f0f0f0; display: flex; align-items: center;
+  justify-content: space-between; flex-shrink: 0; height: 34px;
+}
+.pane-header > span { font-weight: 500; color: #555; }
+textarea {
+  flex: 1; border: none; outline: none; resize: none;
+  font-family: 'Consolas','Fira Code',monospace;
+  font-size: 13px; line-height: 1.6; padding: 12px;
+  overflow: auto; color: #333; background: #fff;
+}
+#outputWrap {
+  flex: 1; overflow: auto; display: flex; background: #fff;
+  font-family: 'Consolas','Fira Code',monospace; font-size: 13px; line-height: 1.6;
+}
+#lineNums {
+  padding: 12px 8px 12px 12px; text-align: right; color: #bbb;
+  background: #fafafa; border-right: 1px solid #f0f0f0;
+  user-select: none; flex-shrink: 0; white-space: pre; min-width: 36px;
+}
+#outputArea { padding: 12px; white-space: pre; flex: 1; overflow: auto; }
+.j-key  { color: #905; }
+.j-str  { color: #07a; }
+.j-num  { color: #e67700; }
+.j-bool { color: #1677ff; }
+.j-null { color: #999; }
+.j-bad  { color: #ff4d4f; background: #fff2f0; border-bottom: 1.5px solid #ff4d4f; cursor: help; }
+.view-tabs { display: flex; }
+.view-tab {
+  padding: 2px 10px; font-size: 12px; border: 1px solid #d9d9d9;
+  background: #fff; cursor: pointer; color: #666;
+}
+.view-tab:first-child { border-radius: 4px 0 0 4px; }
+.view-tab:last-child  { border-radius: 0 4px 4px 0; border-left: none; }
+.view-tab.active { background: #1677ff; color: #fff; border-color: #1677ff; }
+#treeArea {
+  flex: 1; overflow: auto; padding: 12px;
+  font-family: 'Consolas','Fira Code',monospace; font-size: 13px; display: none;
+}
+.tn   { line-height: 1.8; }
+.tt   { cursor: pointer; user-select: none; color: #aaa; font-size: 10px; margin-right: 3px; }
+.tt:hover { color: #1677ff; }
+.tc   { margin-left: 18px; border-left: 1px dashed #e4e4e4; padding-left: 8px; }
+.tbr  { color: #555; }
+.tk   { color: #905; }
+.tv-str  { color: #07a; }
+.tv-num  { color: #e67700; }
+.tv-bool { color: #1677ff; }
+.tv-null { color: #999; }
+.tv-bad  { color: #ff4d4f; background: #fff2f0; border-bottom: 1.5px solid #ff4d4f; cursor: help; }
+.t-cnt   { color: #bbb; font-size: 11px; margin-left: 4px; }
+.t-warn  { font-size: 10px; color: #ff4d4f; margin-left: 5px; cursor: help; }
+.stats {
+  padding: 4px 12px; font-size: 11px; color: #aaa;
+  border-top: 1px solid #f0f0f0; background: #fafafa; flex-shrink: 0;
+}
+.splitter { width: 4px; background: #e8e8e8; cursor: col-resize; flex-shrink: 0; }
+.splitter:hover { background: #1677ff; }
+</style>
+</head>
+<body>
+<div class="topbar">
+  <h1>JSON 工具</h1>
+  <div class="sep"></div>
+  <button class="btn primary" onclick="doFormat()">格式化</button>
+  <button class="btn" onclick="doCompress()">压缩</button>
+  <button class="btn" onclick="doSort()">排序键名</button>
+  <div class="sep"></div>
+  <button class="btn success" onclick="doCopy()">复制结果</button>
+  <button class="btn" onclick="loadSample()">示例</button>
+  <button class="btn danger" onclick="clearAll()">清空</button>
+</div>
+<div class="statusbar">
+  <span id="statusMsg" class="s-idle">就绪</span>
+  <span id="statusMeta" class="s-meta"></span>
+</div>
+<div class="main" id="mainLayout">
+  <div class="pane" id="leftPane">
+    <div class="pane-header"><span>输入</span></div>
+    <textarea id="inputArea" spellcheck="false" placeholder="在此粘贴 JSON..." oninput="onInput()"></textarea>
+  </div>
+  <div class="splitter" id="splitter"></div>
+  <div class="pane">
+    <div class="pane-header">
+      <span>结果</span>
+      <div class="view-tabs">
+        <div class="view-tab active" id="tabText" onclick="switchView('text')">文本</div>
+        <div class="view-tab" id="tabTree" onclick="switchView('tree')">树形</div>
+      </div>
+    </div>
+    <div id="outputWrap"><div id="lineNums"></div><div id="outputArea"></div></div>
+    <div id="treeArea"></div>
+    <div class="stats" id="outputStats"></div>
+  </div>
+</div>
+<script>
+// ═══════════════════════════════════════════════
+//  Tolerant JSON parser — builds an AST,
+//  attaches error info to each bad node.
+//  Handles: unquoted keys (with spaces), unquoted
+//  values, single quotes, bad escapes, missing
+//  colons/values, trailing commas, undefined, etc.
+// ═══════════════════════════════════════════════
+function tolerantParse(src) {
+  let pos = 0;
+  const allErrs = [];
+
+  function addErr(msg, from, to) {
+    allErrs.push({ msg, from: from != null ? from : pos, to: to != null ? to : pos });
+  }
+  function skipWS() {
+    while (pos < src.length && /\s/.test(src[pos])) pos++;
+  }
+
+  function readString() {
+    const start = pos;
+    const q = src[pos++];
+    let val = '';
+    const errs = [];
+    while (pos < src.length && src[pos] !== q) {
+      if (src[pos] === '\\') {
+        const esc = src[pos + 1];
+        const MAP = { '"':'"', "'":"'", '\\':'\\', '/':'/', b:'\b', f:'\f', n:'\n', r:'\r', t:'\t' };
+        if (esc === 'u') {
+          const hex = src.slice(pos + 2, pos + 6);
+          if (/^[0-9a-fA-F]{4}$/.test(hex)) { val += String.fromCharCode(parseInt(hex, 16)); pos += 6; continue; }
+        }
+        if (MAP[esc] !== undefined) { val += MAP[esc]; pos += 2; continue; }
+        errs.push({ msg: '非法转义 \\' + (esc || ''), from: pos, to: pos + 2 });
+        addErr('非法转义 \\' + (esc || ''), pos, pos + 2);
+        val += (esc || ''); pos += 2; continue;
+      }
+      val += src[pos++];
+    }
+    if (pos < src.length) pos++;
+    else { errs.push({ msg: '字符串未闭合', from: start, to: pos }); addErr('字符串未闭合', start, pos); }
+    if (q === "'") { errs.push({ msg: '应使用双引号', from: start, to: start + 1 }); addErr('应使用双引号', start, start + 1); }
+    return { val, start, end: pos, errs };
+  }
+
+  function parseValue() {
+    skipWS();
+    if (pos >= src.length) return mkNull([{ msg: '意外结束' }]);
+    const c = src[pos];
+
+    if (c === '"' || c === "'") {
+      const s = readString();
+      return { type: 'string', val: s.val, errs: s.errs, start: s.start, end: s.end };
+    }
+    if (c === '{') return parseObject();
+    if (c === '[') return parseArray();
+
+    // number
+    if (c === '-' || (c >= '0' && c <= '9')) {
+      const start = pos;
+      if (src[pos] === '-') pos++;
+      while (pos < src.length && /[0-9]/.test(src[pos])) pos++;
+      if (src[pos] === '.') { pos++; while (pos < src.length && /[0-9]/.test(src[pos])) pos++; }
+      if (src[pos] === 'e' || src[pos] === 'E') { pos++; if ('+-'.includes(src[pos])) pos++; while (pos < src.length && /[0-9]/.test(src[pos])) pos++; }
+      return { type: 'number', val: parseFloat(src.slice(start, pos)), errs: [], start, end: pos };
+    }
+
+    // keywords
+    for (const kw of ['true', 'false', 'null', 'undefined']) {
+      if (src.startsWith(kw, pos)) {
+        const start = pos; pos += kw.length;
+        const errs = kw === 'undefined' ? [{ msg: 'undefined 不是合法 JSON' }] : [];
+        if (errs.length) addErr(errs[0].msg, start, pos);
+        return { type: kw === 'true' || kw === 'false' ? 'boolean' : 'null',
+                 val: kw === 'true' ? true : kw === 'false' ? false : null,
+                 errs, start, end: pos };
+      }
+    }
+
+    // bare unquoted token
+    const bStart = pos;
+    while (pos < src.length && !/[\s,:{}\[\]]/.test(src[pos])) pos++;
+    const raw = src.slice(bStart, pos);
+    const errs = [{ msg: '值应加双引号' }];
+    addErr('值应加双引号', bStart, pos);
+    return { type: 'string', val: raw, errs, start: bStart, end: pos };
+  }
+
+  function mkNull(errs) {
+    return { type: 'null', val: null, errs: errs || [], start: pos, end: pos };
+  }
+
+  function parseObject() {
+    const start = pos++;   // skip {
+    const entries = [];
+    skipWS();
+
+    while (pos < src.length && src[pos] !== '}') {
+      skipWS();
+      if (pos >= src.length || src[pos] === '}') break;
+
+      // Read key
+      let keyVal = '', keyErrs = [], keyStart = pos;
+      if (src[pos] === '"' || src[pos] === "'") {
+        const s = readString();
+        keyVal = s.val; keyErrs = s.errs;
+      } else {
+        // bare key: read until colon (may contain spaces)
+        const from = pos;
+        while (pos < src.length && src[pos] !== ':' && src[pos] !== ',' && src[pos] !== '}' && src[pos] !== '\n') pos++;
+        keyVal = src.slice(from, pos).trim();
+        if (keyVal) { keyErrs = [{ msg: 'Key 应加双引号' }]; addErr('Key 应加双引号', from, pos); }
+      }
+
+      skipWS();
+
+      // Expect colon
+      if (pos < src.length && src[pos] === ':') {
+        pos++;
+      } else {
+        // No colon — key has no value (e.g. {"1"})
+        addErr('缺少冒号', pos, pos);
+        entries.push({
+          key: { val: keyVal, errs: keyErrs },
+          val: mkNull([{ msg: '缺少值' }])
+        });
+        skipWS();
+        if (pos < src.length && src[pos] === ',') pos++;
+        continue;
+      }
+
+      skipWS();
+
+      // Read value
+      let valNode;
+      if (pos >= src.length || src[pos] === ',' || src[pos] === '}') {
+        addErr('缺少值', pos, pos);
+        valNode = mkNull([{ msg: '缺少值' }]);
+      } else {
+        valNode = parseValue();
+      }
+
+      entries.push({ key: { val: keyVal, errs: keyErrs }, val: valNode });
+
+      skipWS();
+      if (pos < src.length && src[pos] === ',') {
+        pos++; skipWS();
+        if (src[pos] === '}') addErr('多余的逗号', pos - 1, pos);
+      } else if (pos < src.length && src[pos] !== '}') {
+        addErr('缺少逗号', pos, pos);
+      }
+    }
+
+    if (pos < src.length && src[pos] === '}') pos++;
+    else addErr('对象未闭合（缺少 }）', pos, pos);
+
+    return { type: 'object', entries, errs: [], start, end: pos };
+  }
+
+  function parseArray() {
+    const start = pos++; // skip [
+    const items = [];
+    skipWS();
+    while (pos < src.length && src[pos] !== ']') {
+      skipWS(); if (src[pos] === ']') break;
+      items.push(parseValue());
+      skipWS();
+      if (pos < src.length && src[pos] === ',') {
+        pos++; skipWS();
+        if (src[pos] === ']') addErr('多余的逗号', pos - 1, pos);
+      } else if (pos < src.length && src[pos] !== ']') {
+        addErr('缺少逗号', pos, pos);
+      }
+    }
+    if (pos < src.length && src[pos] === ']') pos++;
+    else addErr('数组未闭合（缺少 ]）', pos, pos);
+    return { type: 'array', items, errs: [], start, end: pos };
+  }
+
+  skipWS();
+  const tree = parseValue();
+  skipWS();
+  if (pos < src.length) {
+    addErr('末尾多余内容：' + JSON.stringify(src.slice(pos, pos + 20)), pos, src.length);
+  }
+
+  return { tree, allErrs };
+}
+
+// ═══════════════════════════════════════════════
+//  AST → formatted HTML (pretty-printed)
+// ═══════════════════════════════════════════════
+function astToHTML(node, depth) {
+  depth = depth || 0;
+  const P  = '  '.repeat(depth);
+  const P1 = '  '.repeat(depth + 1);
+
+  if (!node) return s('j-null', 'null');
+
+  if (node.type === 'object') {
+    if (!node.entries.length) return '{}';
+    const rows = node.entries.map((e, i) => {
+      const comma = i < node.entries.length - 1 ? ',' : '';
+      const keyHtml = e.key.errs && e.key.errs.length
+        ? bad('"' + esc(e.key.val) + '"', e.key.errs.map(x => x.msg).join('；'))
+        : s('j-key', '"' + esc(e.key.val) + '"');
+      const valHtml = astToHTML(e.val, depth + 1);
+      const vErrs = (e.val && e.val.errs || []).filter(x => x.msg);
+      const badge = vErrs.length ? warnBadge(vErrs[0].msg) : '';
+      return P1 + keyHtml + ': ' + valHtml + badge + comma;
+    });
+    return '{\n' + rows.join('\n') + '\n' + P + '}';
+  }
+
+  if (node.type === 'array') {
+    if (!node.items.length) return '[]';
+    const rows = node.items.map((item, i) => {
+      const comma = i < node.items.length - 1 ? ',' : '';
+      const vErrs = (item && item.errs || []).filter(x => x.msg);
+      const badge = vErrs.length ? warnBadge(vErrs[0].msg) : '';
+      return P1 + astToHTML(item, depth + 1) + badge + comma;
+    });
+    return '[\n' + rows.join('\n') + '\n' + P + ']';
+  }
+
+  const errs = (node.errs || []).filter(x => x.msg);
+  const tip  = errs.map(x => x.msg).join('；');
+
+  if (node.type === 'string') {
+    const raw = '"' + esc(escStr(node.val)) + '"';
+    return errs.length ? bad(raw, tip) : s('j-str', raw);
+  }
+  if (node.type === 'number')  return errs.length ? bad(String(node.val), tip) : s('j-num', String(node.val));
+  if (node.type === 'boolean') return errs.length ? bad(String(node.val), tip) : s('j-bool', String(node.val));
+  return errs.length ? bad('null', tip) : s('j-null', 'null');
+}
+
+function s(cls, v)     { return cls ? `<span class="${cls}">${v}</span>` : v; }
+function bad(v, tip)   { return `<span class="j-bad" title="${ea(tip)}">${v}</span>`; }
+function warnBadge(m)  { return ` <span style="font-size:10px;color:#ff4d4f;cursor:help" title="${ea(m)}">⚠</span>`; }
+function esc(v)  { return String(v).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+function ea(v)   { return String(v).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;'); }
+function escStr(v) { return String(v).replace(/\\/g,'\\\\').replace(/"/g,'\\"').replace(/\n/g,'\\n').replace(/\r/g,'\\r').replace(/\t/g,'\\t'); }
+
+// ═══════════════════════════════════════════════
+//  AST → tree view HTML
+// ═══════════════════════════════════════════════
+function astToTree(node, keyHtml) {
+  keyHtml = keyHtml || '';
+  if (!node) return `<div class="tn">${keyHtml}${s('tv-null','null')}</div>`;
+  const errs = (node.errs || []).filter(x => x.msg);
+  const tip  = errs.map(x => x.msg).join('；');
+  const badge = errs.length ? `<span class="t-warn" title="${ea(tip)}">⚠ ${esc(errs[0].msg)}</span>` : '';
+
+  if (node.type === 'object') {
+    if (!node.entries.length) return `<div class="tn">${keyHtml}<span class="tbr">{}</span>${badge}</div>`;
+    const id = uid();
+    const kids = node.entries.map(e => {
+      const ke = e.key.errs && e.key.errs.length;
+      const kt = ke ? e.key.errs.map(x=>x.msg).join('；') : '';
+      const kh = ke
+        ? `<span class="tk tv-bad" title="${ea(kt)}">"${esc(e.key.val)}"</span>: `
+        : `<span class="tk">"${esc(e.key.val)}"</span>: `;
+      return astToTree(e.val, kh);
+    }).join('');
+    return `<div class="tn">${keyHtml}<span class="tt" onclick="tog('${id}',this)">▼</span><span class="tbr">{</span><span class="t-cnt">${node.entries.length} 项</span>${badge}<div class="tc" id="${id}">${kids}</div><span class="tbr">}</span></div>`;
+  }
+
+  if (node.type === 'array') {
+    if (!node.items.length) return `<div class="tn">${keyHtml}<span class="tbr">[]</span>${badge}</div>`;
+    const id = uid();
+    const kids = node.items.map(item => astToTree(item, '')).join('');
+    return `<div class="tn">${keyHtml}<span class="tt" onclick="tog('${id}',this)">▼</span><span class="tbr">[</span><span class="t-cnt">${node.items.length} 项</span>${badge}<div class="tc" id="${id}">${kids}</div><span class="tbr">]</span></div>`;
+  }
+
+  let vHtml;
+  if (node.type === 'string') {
+    const raw = '"' + esc(escStr(node.val)) + '"';
+    vHtml = errs.length ? `<span class="tv-bad" title="${ea(tip)}">${raw}</span>` : `<span class="tv-str">${raw}</span>`;
+  } else if (node.type === 'number') {
+    vHtml = errs.length ? `<span class="tv-bad" title="${ea(tip)}">${node.val}</span>` : `<span class="tv-num">${node.val}</span>`;
+  } else if (node.type === 'boolean') {
+    vHtml = errs.length ? `<span class="tv-bad" title="${ea(tip)}">${node.val}</span>` : `<span class="tv-bool">${node.val}</span>`;
+  } else {
+    vHtml = errs.length ? `<span class="tv-bad" title="${ea(tip)}">null</span>` : `<span class="tv-null">null</span>`;
+  }
+  return `<div class="tn">${keyHtml}${vHtml}${badge}</div>`;
+}
+
+function uid() { return 'n' + Math.random().toString(36).slice(2); }
+function tog(id, btn) {
+  const el = document.getElementById(id);
+  if (el.style.display === 'none') { el.style.display = ''; btn.textContent = '▼'; }
+  else { el.style.display = 'none'; btn.textContent = '▶'; }
+}
+
+// ═══════════════════════════════════════════════
+//  UI
+// ═══════════════════════════════════════════════
+let currentView = 'text';
+let lastTree = null;
+let lastPlain = '';
+
+const splitter = document.getElementById('splitter');
+const leftPane = document.getElementById('leftPane');
+let dragging = false, startX, startW;
+splitter.addEventListener('mousedown', e => { dragging=true; startX=e.clientX; startW=leftPane.getBoundingClientRect().width; document.body.style.userSelect='none'; });
+document.addEventListener('mousemove', e => { if(!dragging)return; const tot=document.getElementById('mainLayout').getBoundingClientRect().width-4; leftPane.style.flex='none'; leftPane.style.width=Math.max(200,Math.min(tot-200,startW+(e.clientX-startX)))+'px'; });
+document.addEventListener('mouseup', () => { dragging=false; document.body.style.userSelect=''; });
+
+function setSt(msg,type){ const el=document.getElementById('statusMsg'); el.textContent=msg; el.className='s-'+type; }
+function setMeta(s){ document.getElementById('statusMeta').textContent=s; }
+function fmtB(b){ return b<1024?b+' B':b<1048576?(b/1024).toFixed(1)+' KB':(b/1048576).toFixed(2)+' MB'; }
+
+function onInput() {
+  const v = document.getElementById('inputArea').value.trim();
+  if (!v) { setSt('就绪','idle'); setMeta(''); return; }
+  try { JSON.parse(v); setSt('✓ 合法 JSON','ok'); setMeta(v.length+' 字符'); }
+  catch(e) { setSt('⚠ 包含错误，点格式化查看','warn'); setMeta(''); }
+}
+
+function runFormat(raw) {
+  const { tree, allErrs } = tolerantParse(raw);
+  lastTree = tree;
+  const html = astToHTML(tree, 0);
+  lastPlain = html.replace(/<[^>]+>/g, '');
+  const lines = (html.match(/\n/g)||[]).length + 1;
+  document.getElementById('lineNums').textContent = Array.from({length:lines},(_,i)=>i+1).join('\n');
+  document.getElementById('outputArea').innerHTML = html;
+  document.getElementById('outputWrap').style.display = 'flex';
+  document.getElementById('treeArea').style.display = 'none';
+  const ec = allErrs.length;
+  setSt(ec ? `⚠ ${ec} 处问题（悬停红色部分查看原因）` : '✓ 格式化完成', ec ? 'warn' : 'ok');
+  setMeta(raw.length+' 字符 · '+lines+' 行 · '+fmtB(new Blob([raw]).size));
+  document.getElementById('outputStats').textContent = ec ? '红色标注处有问题，鼠标悬停可查看说明' : '';
+  return tree;
+}
+
+function doFormat() {
+  const raw = document.getElementById('inputArea').value.trim();
+  if (!raw) { setSt('请输入内容','err'); return; }
+  runFormat(raw);
+  if (currentView === 'tree' && lastTree) showTree();
+}
+
+function doCompress() {
+  const raw = document.getElementById('inputArea').value.trim();
+  if (!raw) { setSt('请输入内容','err'); return; }
+  const { tree } = tolerantParse(raw);
+  const out = JSON.stringify(treeToJs(tree));
+  lastPlain = out;
+  document.getElementById('lineNums').textContent = '1';
+  document.getElementById('outputArea').innerHTML = syntaxHL(out);
+  document.getElementById('outputWrap').style.display = 'flex';
+  document.getElementById('treeArea').style.display = 'none';
+  setSt('✓ 压缩完成','ok');
+  setMeta(out.length+' 字符 · '+fmtB(new Blob([out]).size));
+}
+
+function doSort() {
+  const raw = document.getElementById('inputArea').value.trim();
+  if (!raw) { setSt('请输入内容','err'); return; }
+  const { tree } = tolerantParse(raw);
+  lastTree = sortTree(tree);
+  const html = astToHTML(lastTree, 0);
+  lastPlain = html.replace(/<[^>]+>/g,'');
+  const lines = (html.match(/\n/g)||[]).length+1;
+  document.getElementById('lineNums').textContent = Array.from({length:lines},(_,i)=>i+1).join('\n');
+  document.getElementById('outputArea').innerHTML = html;
+  document.getElementById('outputWrap').style.display = 'flex';
+  document.getElementById('treeArea').style.display = 'none';
+  setSt('✓ 键名已排序','ok');
+  if (currentView === 'tree') showTree();
+}
+
+function treeToJs(node) {
+  if (!node) return null;
+  if (node.type === 'object') { const o={}; (node.entries||[]).forEach(e=>{ o[e.key.val]=treeToJs(e.val); }); return o; }
+  if (node.type === 'array') return (node.items||[]).map(treeToJs);
+  return node.val != null ? node.val : null;
+}
+
+function sortTree(node) {
+  if (!node) return node;
+  if (node.type === 'object') { const e=[...node.entries].sort((a,b)=>a.key.val.localeCompare(b.key.val)); return {...node, entries:e.map(x=>({...x,val:sortTree(x.val)}))}; }
+  if (node.type === 'array') return {...node, items:node.items.map(sortTree)};
+  return node;
+}
+
+function syntaxHL(json) {
+  return esc(json).replace(
+    /(&quot;(?:\\u[0-9a-fA-F]{4}|\\[^u]|[^\\&])*&quot;(\s*:)?|\b(?:true|false|null)\b|-?\d+(?:\.\d*)?(?:[eE][+\-]?\d+)?)/g,
+    m => {
+      if (m.startsWith('&quot;')) return /:$/.test(m) ? s('j-key',m) : s('j-str',m);
+      if (/true|false/.test(m)) return s('j-bool',m);
+      if (/null/.test(m)) return s('j-null',m);
+      return s('j-num',m);
+    }
+  );
+}
+
+function switchView(view) {
+  currentView = view;
+  document.getElementById('tabText').className = 'view-tab'+(view==='text'?' active':'');
+  document.getElementById('tabTree').className = 'view-tab'+(view==='tree'?' active':'');
+  if (view === 'tree') {
+    if (!lastTree) doFormat();
+    else showTree();
+  } else {
+    document.getElementById('outputWrap').style.display = 'flex';
+    document.getElementById('treeArea').style.display = 'none';
+  }
+}
+
+function showTree() {
+  document.getElementById('treeArea').innerHTML = astToTree(lastTree, '');
+  document.getElementById('treeArea').style.display = 'block';
+  document.getElementById('outputWrap').style.display = 'none';
+}
+
+function doCopy() {
+  const text = lastPlain || document.getElementById('outputArea').innerText;
+  if (!text.trim()) { setSt('没有可复制的内容','err'); return; }
+  navigator.clipboard.writeText(text).then(() => setSt('✓ 已复制到剪贴板','ok'));
+}
+
+function clearAll() {
+  document.getElementById('inputArea').value = '';
+  document.getElementById('outputArea').innerHTML = '';
+  document.getElementById('lineNums').textContent = '';
+  document.getElementById('treeArea').innerHTML = '';
+  document.getElementById('outputStats').textContent = '';
+  lastTree = null; lastPlain = '';
+  setSt('就绪','idle'); setMeta('');
+}
+
+function loadSample() {
+  document.getElementById('inputArea').value = '{"name":"张三","age":28,"active":true,"score":null,"tags":["developer","designer"],"address":{"city":"北京","zip":"100000"},"projects":[{"id":1,"title":"项目A","done":true},{"id":2,"title":"项目B","done":false}]}';
+  onInput(); doFormat();
+}
+
+document.getElementById('inputArea').addEventListener('paste', () => {
+  setTimeout(() => { onInput(); doFormat(); }, 0);
+});
+</script>
+</body>
+</html>
