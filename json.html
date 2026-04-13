@@ -558,7 +558,22 @@ function showTree() {
 function doCopy() {
   const text = lastPlain || document.getElementById('outputArea').innerText;
   if (!text.trim()) { setSt('没有可复制的内容','err'); return; }
-  navigator.clipboard.writeText(text).then(() => setSt('✓ 已复制到剪贴板','ok'));
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(text).then(() => setSt('✓ 已复制到剪贴板','ok')).catch(() => execCopy(text));
+  } else {
+    execCopy(text);
+  }
+}
+
+function execCopy(text) {
+  const ta = document.createElement('textarea');
+  ta.value = text;
+  ta.style.cssText = 'position:fixed;top:-9999px;left:-9999px;opacity:0';
+  document.body.appendChild(ta);
+  ta.focus(); ta.select();
+  const ok = document.execCommand('copy');
+  document.body.removeChild(ta);
+  setSt(ok ? '✓ 已复制到剪贴板' : '✗ 复制失败，请手动复制', ok ? 'ok' : 'err');
 }
 
 function clearAll() {
