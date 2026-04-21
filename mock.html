@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>免登录 Mock 服务</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: #f5f5f3; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; padding: 2rem 1rem; }
+  .wrap { max-width: 480px; margin: 0 auto; }
+  h1 { font-size: 18px; font-weight: 500; color: #1a1a18; margin-bottom: 4px; }
+  .sub { font-size: 13px; color: #6b6b67; margin-bottom: 1.5rem; }
+  .section { margin-bottom: 1.4rem; }
+  .section-label {
+    font-size: 11px; font-weight: 500; letter-spacing: .06em; text-transform: uppercase;
+    color: #9b9b96; margin-bottom: 8px; padding-bottom: 6px;
+    border-bottom: 0.5px solid #e0e0d8;
+  }
+  .item {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 10px 14px; background: #ffffff; border: 0.5px solid #e0e0d8;
+    border-radius: 8px; margin-bottom: 6px; text-decoration: none;
+    transition: border-color .15s, background .15s; gap: 12px;
+  }
+  .item:hover { border-color: #c0c0b8; background: #f5f5f3; }
+  .item-left { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+  .item-name { font-size: 14px; font-weight: 500; color: #1a1a18; }
+  .item-url { font-size: 12px; color: #6b6b67; font-family: monospace; }
+  .arrow { color: #9b9b96; font-size: 14px; flex-shrink: 0; }
+  .badge { font-size: 11px; padding: 2px 8px; border-radius: 20px; font-weight: 500; flex-shrink: 0; }
+  .b-custom { background: #EEEDFE; color: #3C3489; }
+  .b-sched  { background: #FAEEDA; color: #633806; }
+  .img-row {
+    display: flex; align-items: center; gap: 8px; padding: 8px 14px;
+    background: #ffffff; border: 0.5px solid #e0e0d8; border-radius: 8px;
+  }
+  .img-row input {
+    width: 72px; font-size: 13px; font-family: monospace;
+    padding: 4px 8px; border: 0.5px solid #c0c0b8; border-radius: 6px;
+    background: #f5f5f3; color: #1a1a18; text-align: center;
+  }
+  .img-row input:focus { outline: none; border-color: #888780; }
+  .sep { font-size: 13px; color: #9b9b96; }
+  .img-url-display {
+    flex: 1; font-size: 12px; font-family: monospace; color: #185FA5;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0;
+  }
+  .go-btn {
+    font-size: 12px; padding: 4px 12px; border: 0.5px solid #c0c0b8;
+    border-radius: 6px; background: transparent; color: #6b6b67;
+    cursor: pointer; flex-shrink: 0; white-space: nowrap;
+  }
+  .go-btn:hover { background: #f5f5f3; color: #1a1a18; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>免登录 Mock 服务</h1>
+  <p class="sub">无需注册，直接调用</p>
+
+  <div class="section">
+    <div class="section-label">自定义 Mock</div>
+    <a class="item" href="https://github.com/typicode/json-server" target="_blank">
+      <div class="item-left">
+        <span class="item-name">json-server</span>
+        <span class="item-url">npm install json-server</span>
+      </div>
+      <span class="badge b-custom">自定义响应</span>
+      <span class="arrow">↗</span>
+    </a>
+    <a class="item" href="https://crequest.cronhooks.io" target="_blank">
+      <div class="item-left">
+        <span class="item-name">CronHooks Request</span>
+        <span class="item-url">crequest.cronhooks.io</span>
+      </div>
+      <span class="badge b-sched">定时触发</span>
+      <span class="arrow">↗</span>
+    </a>
+  </div>
+
+  <div class="section">
+    <div class="section-label">图片占位</div>
+    <div class="img-row">
+      <input id="w" type="number" value="300" min="1" max="5000" />
+      <span class="sep">×</span>
+      <input id="h" type="number" value="300" min="1" max="5000" />
+      <span class="img-url-display" id="urlDisplay">picsum.photos/300/300</span>
+      <button class="go-btn" id="goBtn">打开 ↗</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  const w = document.getElementById('w');
+  const h = document.getElementById('h');
+  const display = document.getElementById('urlDisplay');
+  const btn = document.getElementById('goBtn');
+  function update() {
+    display.textContent = 'picsum.photos/' + (w.value || 300) + '/' + (h.value || 300);
+  }
+  w.addEventListener('input', update);
+  h.addEventListener('input', update);
+  btn.addEventListener('click', () => {
+    window.open('https://picsum.photos/' + (w.value || 300) + '/' + (h.value || 300), '_blank');
+  });
+</script>
+</body>
+</html>

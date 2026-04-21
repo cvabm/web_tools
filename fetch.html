@@ -1,0 +1,612 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>控制台实用工具箱 · 精简版</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: #f5f7fa;
+      color: #1e1e2f;
+    }
+
+    .header {
+      background: #0b1a2f;
+      color: #ffffff;
+      padding: 24px 32px;
+      border-bottom: 2px solid #2d4a6e;
+    }
+
+    .header h1 {
+      font-size: 22px;
+      font-weight: 600;
+      letter-spacing: -0.3px;
+    }
+
+    .header p {
+      font-size: 13px;
+      color: #a0b3cc;
+      margin-top: 6px;
+    }
+
+    .container {
+      max-width: 920px;
+      margin: 0 auto;
+      padding: 24px 20px 60px;
+    }
+
+    .section-title {
+      font-size: 12px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+      color: #4a5c72;
+      margin: 32px 0 12px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .section-title::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: linear-gradient(90deg, #cbd5e1 0%, transparent 90%);
+    }
+
+    .card {
+      background: #ffffff;
+      border-radius: 14px;
+      overflow: hidden;
+      margin-bottom: 12px;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.03), 0 1px 2px rgba(0, 0, 0, 0.05);
+      border: 1px solid #e2e8f0;
+      transition: box-shadow 0.15s;
+    }
+
+    .card:hover {
+      box-shadow: 0 6px 14px rgba(0, 0, 0, 0.04);
+    }
+
+    .card-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 14px 18px;
+      background: #ffffff;
+      cursor: pointer;
+      user-select: none;
+      transition: background 0.1s;
+      border-bottom: 1px solid transparent;
+    }
+
+    .card-header:hover {
+      background: #fafcff;
+    }
+
+    .card-title {
+      font-size: 15px;
+      font-weight: 540;
+      color: #0f1a2c;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .card-desc {
+      font-size: 12px;
+      color: #5e6f8d;
+      margin-top: 3px;
+    }
+
+    .badge {
+      font-size: 10px;
+      padding: 3px 10px;
+      border-radius: 20px;
+      font-weight: 600;
+      letter-spacing: 0.2px;
+      background: #eef2ff;
+      color: #1e3a8a;
+      border: 0.5px solid #cddfff;
+    }
+
+    .badge-green {
+      background: #e3f2e9;
+      color: #0b5e3c;
+      border-color: #b7dec9;
+    }
+
+    .badge-amber {
+      background: #fff4e5;
+      color: #9e4c0e;
+      border-color: #ffd9a3;
+    }
+
+    .badge-red {
+      background: #ffeae9;
+      color: #b42318;
+      border-color: #fccac7;
+    }
+
+    .collapsible {
+      display: none;
+      border-top: 1px solid #edf2f7;
+    }
+
+    .collapsible.open {
+      display: block;
+    }
+
+    .code-block {
+      position: relative;
+      background: #0d1b2a;
+    }
+
+    .code-block pre {
+      padding: 18px 18px 14px;
+      font-family: 'SF Mono', 'Fira Code', 'Cascadia Code', Consolas, monospace;
+      font-size: 12.5px;
+      line-height: 1.65;
+      color: #e3e9f2;
+      overflow-x: auto;
+      white-space: pre;
+      tab-size: 2;
+      margin: 0;
+    }
+
+    .copy-btn {
+      position: absolute;
+      top: 10px;
+      right: 12px;
+      background: #1f3547;
+      border: none;
+      border-radius: 8px;
+      color: #dee9fc;
+      font-size: 11px;
+      font-weight: 500;
+      padding: 5px 12px;
+      cursor: pointer;
+      transition: all 0.15s;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+      backdrop-filter: blur(2px);
+    }
+
+    .copy-btn:hover {
+      background: #2e4b6b;
+      color: white;
+    }
+
+    .copy-btn.copied {
+      background: #1f7b4d;
+      color: white;
+    }
+
+    .note {
+      font-size: 11.5px;
+      color: #4a627a;
+      padding: 10px 18px 14px;
+      background: #f8fafd;
+      border-top: 1px dashed #dce5ec;
+      line-height: 1.5;
+    }
+
+    .chevron {
+      font-size: 18px;
+      color: #7b8da3;
+      transition: transform 0.2s;
+      margin-left: 10px;
+      font-weight: 400;
+    }
+
+    .chevron.open {
+      transform: rotate(90deg);
+    }
+
+    /* 语法高亮 */
+    .kw { color: #f78c6c; font-weight: 500; }
+    .fn { color: #82aaff; }
+    .str { color: #c3e88d; }
+    .cm { color: #697098; font-style: italic; }
+    .num { color: #f4b67c; }
+    .var { color: #c792ea; }
+  </style>
+</head>
+<body>
+<div class="header">
+  <h1>⚡ Chrome 控制台速查手册 · 实用精简版</h1>
+  <p>复制 → 粘贴到控制台 → 修改参数 → 回车即用。聚焦高频、稳定、免登录。</p>
+</div>
+
+<div class="container">
+
+  <!-- ========= 网络请求 (fetch + 实用场景) ========= -->
+  <div class="section-title">📡 HTTP 请求 · 即用</div>
+
+  <!-- GET + 表格展示 -->
+  <div class="card">
+    <div class="card-header" onclick="toggleCard(this)">
+      <div>
+        <div class="card-title">GET 请求（带模拟 Token + 表格展示）</div>
+        <div class="card-desc">jsonplaceholder 公开 API，控制台表格查看</div>
+      </div>
+      <span class="badge">fetch</span>
+    </div>
+    <div class="collapsible">
+      <div class="code-block">
+        <button class="copy-btn" onclick="copyCode(this)">复制</button>
+        <pre><span class="kw">const</span> <span class="var">url</span> = <span class="str">'https://jsonplaceholder.typicode.com/posts/1'</span>;
+<span class="kw">const</span> <span class="var">token</span> = <span class="str">'Bearer demo-token'</span>;
+
+<span class="fn">fetch</span>(url, { headers: { <span class="str">'Authorization'</span>: token } })
+  .<span class="fn">then</span>(r => r.<span class="fn">json</span>())
+  .<span class="fn">then</span>(data => {
+    console.<span class="fn">log</span>(<span class="str">'📦 响应数据:'</span>, data);
+    console.<span class="fn">table</span>(data);   <span class="cm">// 对象/数组更直观</span>
+  })
+  .<span class="fn">catch</span>(console.error);</pre>
+      </div>
+      <div class="note">✅ 公开测试接口，无需真实Token。console.table 可清晰展示字段。</div>
+    </div>
+  </div>
+
+  <!-- POST JSON + token 模板 -->
+  <div class="card">
+    <div class="card-header" onclick="toggleCard(this)">
+      <div>
+        <div class="card-title">POST JSON (带 Authorization 头)</div>
+        <div class="card-desc">发送结构化数据，模拟业务请求</div>
+      </div>
+      <span class="badge">fetch</span>
+    </div>
+    <div class="collapsible">
+      <div class="code-block">
+        <button class="copy-btn" onclick="copyCode(this)">复制</button>
+        <pre><span class="kw">const</span> <span class="var">url</span> = <span class="str">'https://jsonplaceholder.typicode.com/posts'</span>;
+<span class="kw">const</span> <span class="var">payload</span> = {
+  title: <span class="str">'调试任务'</span>,
+  body: <span class="str">'来自控制台的测试'</span>,
+  userId: 42
+};
+
+<span class="fn">fetch</span>(url, {
+  method: <span class="str">'POST'</span>,
+  headers: {
+    <span class="str">'Content-Type'</span>: <span class="str">'application/json'</span>,
+    <span class="str">'Authorization'</span>: <span class="str">'Bearer fake-jwt-token'</span>
+  },
+  body: <span class="fn">JSON.stringify</span>(payload)
+})
+  .<span class="fn">then</span>(r => r.<span class="fn">json</span>())
+  .<span class="fn">then</span>(res => console.<span class="fn">log</span>(<span class="str">'✅ 创建成功'</span>, res))
+  .<span class="fn">catch</span>(console.error);</pre>
+      </div>
+      <div class="note">返回模拟的创建结果，包含 id。用于测试 POST 流程。</div>
+    </div>
+  </div>
+
+  <!-- 携带凭证 (credentials) 请求 —— 实用 -->
+  <div class="card">
+    <div class="card-header" onclick="toggleCard(this)">
+      <div>
+        <div class="card-title">携带 Cookie 的请求 (同源/跨域凭证)</div>
+        <div class="card-desc">模拟登录态请求，自动带 cookie</div>
+      </div>
+      <span class="badge badge-green">include</span>
+    </div>
+    <div class="collapsible">
+      <div class="code-block">
+        <button class="copy-btn" onclick="copyCode(this)">复制</button>
+        <pre><span class="cm">// 在需要登录态的页面运行，携带当前cookie</span>
+<span class="fn">fetch</span>(<span class="str">'https://reqres.in/api/users/2'</span>, {
+  credentials: <span class="str">'include'</span>   <span class="cm">// 同源/跨域均发送凭证</span>
+})
+  .<span class="fn">then</span>(r => r.<span class="fn">json</span>())
+  .<span class="fn">then</span>(user => console.<span class="fn">log</span>(<span class="str">'👤 用户信息'</span>, user))
+  .<span class="fn">catch</span>(console.error);</pre>
+      </div>
+      <div class="note">reqres.in 为公开测试API。若需携带真实cookie，可将URL换成同域地址测试。</div>
+    </div>
+  </div>
+
+  <!-- 轮询接口 (保留但优化) 实用 -->
+  <div class="card">
+    <div class="card-header" onclick="toggleCard(this)">
+      <div>
+        <div class="card-title">⏱️ 轮询请求 (带停止句柄)</div>
+        <div class="card-desc">每 N 秒拉取数据，可随时终止</div>
+      </div>
+      <span class="badge badge-amber">定时</span>
+    </div>
+    <div class="collapsible">
+      <div class="code-block">
+        <button class="copy-btn" onclick="copyCode(this)">复制</button>
+        <pre><span class="kw">const</span> <span class="var">pollUrl</span> = <span class="str">'https://jsonplaceholder.typicode.com/posts/1'</span>;
+<span class="kw">const</span> <span class="var">intervalMs</span> = <span class="num">3000</span>;
+
+<span class="kw">const</span> <span class="var">pollTimer</span> = <span class="fn">setInterval</span>(<span class="kw">async</span> () => {
+  <span class="kw">try</span> {
+    <span class="kw">const</span> <span class="var">res</span> = <span class="kw">await</span> <span class="fn">fetch</span>(pollUrl);
+    <span class="kw">const</span> <span class="var">data</span> = <span class="kw">await</span> res.<span class="fn">json</span>();
+    console.<span class="fn">log</span>(<span class="str">`🔄 [${new Date().toLocaleTimeString()}]`</span>, data);
+  } <span class="kw">catch</span> (e) { console.<span class="fn">warn</span>(<span class="str">'轮询出错'</span>, e); }
+}, intervalMs);
+
+<span class="cm">// 停止轮询: 执行 clearInterval(pollTimer)</span>
+console.<span class="fn">log</span>(<span class="str">'⏹️ 停止轮询: clearInterval(pollTimer)'</span>);</pre>
+      </div>
+      <div class="note">轮询句柄保存在 pollTimer，需要停止时执行 clearInterval(pollTimer)。</div>
+    </div>
+  </div>
+
+  <!-- ========= WebSocket (保留最稳定echo服务) ========= -->
+  <div class="section-title">🔌 WebSocket · 测试回声</div>
+
+  <!-- WebSocket echo + token 示意 -->
+  <div class="card">
+    <div class="card-header" onclick="toggleCard(this)">
+      <div>
+        <div class="card-title">WebSocket 连接 (wss echo，支持token参数)</div>
+        <div class="card-desc">公开回声服务，发送即返回</div>
+      </div>
+      <span class="badge badge-amber">WS</span>
+    </div>
+    <div class="collapsible">
+      <div class="code-block">
+        <button class="copy-btn" onclick="copyCode(this)">复制</button>
+        <pre><span class="kw">const</span> <span class="var">token</span> = <span class="str">'demo-token-123'</span>;
+<span class="kw">const</span> <span class="var">ws</span> = <span class="kw">new</span> <span class="fn">WebSocket</span>(<span class="str">`wss://echo.websocket.org?token=${token}`</span>);
+
+ws.<span class="fn">onopen</span> = () => {
+  console.<span class="fn">log</span>(<span class="str">'✅ WebSocket 已连接 (携带token参数)'</span>);
+  ws.<span class="fn">send</span>(<span class="fn">JSON.stringify</span>({ type: <span class="str">'ping'</span>, msg: <span class="str">'hello echo'</span>, ts: Date.now() }));
+};
+
+ws.<span class="fn">onmessage</span> = (e) => console.<span class="fn">log</span>(<span class="str">'📨 回声:'</span>, e.data);
+ws.<span class="fn">onerror</span> = (e) => console.<span class="fn">error</span>(<span class="str">'❌ 错误'</span>, e);
+ws.<span class="fn">onclose</span> = () => console.<span class="fn">log</span>(<span class="str">'🔌 连接关闭'</span>);
+
+<span class="cm">// 关闭: ws.close()</span></pre>
+      </div>
+      <div class="note">echo.websocket.org 稳定可靠。Token 通过query传递 (浏览器WebSocket无法自定义header)。</div>
+    </div>
+  </div>
+
+  <!-- 并发发消息 (精简但保留) -->
+  <div class="card">
+    <div class="card-header" onclick="toggleCard(this)">
+      <div>
+        <div class="card-title">WebSocket 连续发送 (测试吞吐)</div>
+        <div class="card-desc">快速发送多条消息，观察回声</div>
+      </div>
+      <span class="badge badge-amber">WS</span>
+    </div>
+    <div class="collapsible">
+      <div class="code-block">
+        <button class="copy-btn" onclick="copyCode(this)">复制</button>
+        <pre><span class="kw">const</span> <span class="var">ws2</span> = <span class="kw">new</span> <span class="fn">WebSocket</span>(<span class="str">'wss://echo.websocket.org'</span>);
+ws2.<span class="fn">onopen</span> = () => {
+  [<span class="num">1</span>, <span class="num">2</span>, <span class="num">3</span>].<span class="fn">forEach</span>(i => {
+    ws2.<span class="fn">send</span>(<span class="fn">JSON.stringify</span>({ seq: i, payload: <span class="str">`msg-${i}`</span> }));
+  });
+  console.<span class="fn">log</span>(<span class="str">'📤 已连续发送3条消息'</span>);
+};
+ws2.<span class="fn">onmessage</span> = (e) => {
+  <span class="kw">try</span> { 
+    <span class="kw">const</span> <span class="var">data</span> = <span class="fn">JSON.parse</span>(e.data);
+    console.<span class="fn">log</span>(<span class="str">`⬅️ 收到 seq=${data.seq}`</span>, data);
+  } <span class="kw">catch</span> { console.<span class="fn">log</span>(<span class="str">'收到:'</span>, e.data); }
+};</pre>
+      </div>
+      <div class="note">回声服务会原样返回，可验证消息顺序。</div>
+    </div>
+  </div>
+
+  <!-- ========= 实用调试 · 拦截 + 存储 ========= -->
+  <div class="section-title">🛠️ 调试 & 拦截</div>
+
+  <!-- 拦截fetch (非常有用) -->
+  <div class="card">
+    <div class="card-header" onclick="toggleCard(this)">
+      <div>
+        <div class="card-title">🔍 拦截所有 fetch 请求 (调试神器)</div>
+        <div class="card-desc">打印请求URL、参数及响应预览</div>
+      </div>
+      <span class="badge badge-green">拦截</span>
+    </div>
+    <div class="collapsible">
+      <div class="code-block">
+        <button class="copy-btn" onclick="copyCode(this)">复制</button>
+        <pre><span class="kw">const</span> originalFetch = window.fetch;
+window.<span class="fn">fetch</span> = <span class="kw">async</span> (...args) => {
+  <span class="kw">const</span> [url, options] = args;
+  console.<span class="fn">groupCollapsed</span>(<span class="str">`🌐 fetch: ${url}`</span>);
+  console.<span class="fn">log</span>(<span class="str">'options'</span>, options || {});
+  <span class="kw">const</span> response = <span class="kw">await</span> originalFetch(...args);
+  <span class="kw">const</span> cloned = response.<span class="fn">clone</span>();
+  cloned.<span class="fn">text</span>().<span class="fn">then</span>(body => {
+    <span class="kw">try</span> { 
+      <span class="kw">const</span> json = <span class="fn">JSON.parse</span>(body);
+      console.<span class="fn">log</span>(<span class="str">'📋 响应 (json):'</span>, json);
+    } <span class="kw">catch</span> { console.<span class="fn">log</span>(<span class="str">'📄 响应 (text):'</span>, body.<span class="fn">slice</span>(<span class="num">0</span>, <span class="num">200</span>)); }
+  }).<span class="fn">catch</span>(()=>{});
+  console.<span class="fn">groupEnd</span>();
+  <span class="kw">return</span> response;
+};
+console.<span class="fn">log</span>(<span class="str">'✅ fetch 拦截已激活 (刷新页面后失效)'</span>);</pre>
+      </div>
+      <div class="note">所有fetch请求都会被记录。用groupCollapsed使日志整洁。刷新恢复。</div>
+    </div>
+  </div>
+
+  <!-- localStorage / sessionStorage 查看器 (补充实用) -->
+  <div class="card">
+    <div class="card-header" onclick="toggleCard(this)">
+      <div>
+        <div class="card-title">📦 快速查看 localStorage / sessionStorage</div>
+        <div class="card-desc">一键打印当前域下存储内容</div>
+      </div>
+      <span class="badge">存储</span>
+    </div>
+    <div class="collapsible">
+      <div class="code-block">
+        <button class="copy-btn" onclick="copyCode(this)">复制</button>
+        <pre><span class="cm">// 打印 localStorage (键值对)</span>
+console.<span class="fn">log</span>(<span class="str">'📁 localStorage:'</span>);
+<span class="kw">for</span> (<span class="kw">let</span> i = <span class="num">0</span>; i &lt; localStorage.length; i++) {
+  <span class="kw">const</span> key = localStorage.<span class="fn">key</span>(i);
+  console.<span class="fn">log</span>(<span class="str">`  ${key}`</span>, localStorage.<span class="fn">getItem</span>(key));
+}
+
+<span class="cm">// sessionStorage</span>
+console.<span class="fn">log</span>(<span class="str">'📁 sessionStorage:'</span>);
+<span class="kw">for</span> (<span class="kw">let</span> i = <span class="num">0</span>; i &lt; sessionStorage.length; i++) {
+  <span class="kw">const</span> key = sessionStorage.<span class="fn">key</span>(i);
+  console.<span class="fn">log</span>(<span class="str">`  ${key}`</span>, sessionStorage.<span class="fn">getItem</span>(key));
+}</pre>
+      </div>
+      <div class="note">快速排查本地存储，无需打开Application面板。</div>
+    </div>
+  </div>
+
+  <!-- 获取所有cookie (简单实用) -->
+  <div class="card">
+    <div class="card-header" onclick="toggleCard(this)">
+      <div>
+        <div class="card-title">🍪 查看当前页面 Cookie</div>
+        <div class="card-desc">解析 document.cookie 为对象</div>
+      </div>
+      <span class="badge badge-red">cookie</span>
+    </div>
+    <div class="collapsible">
+      <div class="code-block">
+        <button class="copy-btn" onclick="copyCode(this)">复制</button>
+        <pre><span class="kw">const</span> cookies = document.cookie.<span class="fn">split</span>(<span class="str">';'</span>).<span class="fn">reduce</span>((acc, pair) => {
+  <span class="kw">const</span> [key, val] = pair.<span class="fn">trim</span>().<span class="fn">split</span>(<span class="str">'='</span>);
+  <span class="kw">if</span> (key) acc[key] = <span class="fn">decodeURIComponent</span>(val || <span class="str">''</span>);
+  <span class="kw">return</span> acc;
+}, {});
+console.<span class="fn">log</span>(<span class="str">'🍪 Cookies:'</span>, cookies);
+<span class="cm">// 也可用 console.table(cookies)</span>
+console.<span class="fn">table</span>(cookies);</pre>
+      </div>
+      <div class="note">仅能访问非HttpOnly的cookie。控制台快速查看。</div>
+    </div>
+  </div>
+
+  <!-- 移除SSE —— 不常用且易误解，换成更实用的“复制响应为JSON” -->
+  <div class="card">
+    <div class="card-header" onclick="toggleCard(this)">
+      <div>
+        <div class="card-title">📋 复制 fetch 响应为全局变量</div>
+        <div class="card-desc">将请求结果存为 temp1，方便操作</div>
+      </div>
+      <span class="badge">实用</span>
+    </div>
+    <div class="collapsible">
+      <div class="code-block">
+        <button class="copy-btn" onclick="copyCode(this)">复制</button>
+        <pre><span class="fn">fetch</span>(<span class="str">'https://jsonplaceholder.typicode.com/users/1'</span>)
+  .<span class="fn">then</span>(r => r.<span class="fn">json</span>())
+  .<span class="fn">then</span>(data => {
+    window.<span class="var">temp1</span> = data;
+    console.<span class="fn">log</span>(<span class="str">'✅ 已存为 temp1，可直接使用'</span>, data);
+  });</pre>
+      </div>
+      <div class="note">之后在控制台输入 temp1 即可访问数据，方便进一步调试。</div>
+    </div>
+  </div>
+
+  <!-- 轻提示：常用console方法 -->
+  <div class="card">
+    <div class="card-header" onclick="toggleCard(this)">
+      <div>
+        <div class="card-title">🎨 常用 console 快捷指令</div>
+        <div class="card-desc">table, group, time, assert 等</div>
+      </div>
+      <span class="badge badge-green">备忘</span>
+    </div>
+    <div class="collapsible">
+      <div class="code-block">
+        <button class="copy-btn" onclick="copyCode(this)">复制</button>
+        <pre><span class="cm">// 性能计时</span>
+console.<span class="fn">time</span>(<span class="str">'操作'</span>); <span class="cm">/* 中间代码 */</span> console.<span class="fn">timeEnd</span>(<span class="str">'操作'</span>);
+
+<span class="cm">// 表格展示数组/对象</span>
+console.<span class="fn">table</span>([{a:<span class="num">1</span>,b:<span class="num">2</span>}, {a:<span class="num">3</span>,b:<span class="num">4</span>}]);
+
+<span class="cm">// 分组折叠</span>
+console.<span class="fn">group</span>(<span class="str">'详情'</span>); console.<span class="fn">log</span>(<span class="str">'...'</span>); console.<span class="fn">groupEnd</span>();
+
+<span class="cm">// 断言</span>
+console.<span class="fn">assert</span>(<span class="num">1</span>===2, <span class="str">'不会打印'</span>);
+
+<span class="cm">// 计数</span>
+console.<span class="fn">count</span>(<span class="str">'事件'</span>);</pre>
+      </div>
+      <div class="note">直接复制对应行执行，提升调试效率。</div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+  (function() {
+    // 折叠/展开
+    window.toggleCard = function(headerEl) {
+      const collapsible = headerEl.nextElementSibling;
+      const chevron = headerEl.querySelector('.chevron');
+      if (collapsible) {
+        collapsible.classList.toggle('open');
+        if (chevron) chevron.classList.toggle('open');
+      }
+    };
+
+    // 复制功能
+    window.copyCode = function(btn) {
+      const pre = btn.nextElementSibling;
+      if (!pre) return;
+      const text = pre.innerText;
+      navigator.clipboard?.writeText(text).then(() => {
+        btn.textContent = '✅ 已复制';
+        btn.classList.add('copied');
+        setTimeout(() => {
+          btn.textContent = '复制';
+          btn.classList.remove('copied');
+        }, 1400);
+      }).catch(() => {
+        // fallback
+        const ta = document.createElement('textarea');
+        ta.value = text;
+        document.body.appendChild(ta);
+        ta.select();
+        document.execCommand('copy');
+        document.body.removeChild(ta);
+        btn.textContent = '已复制';
+        setTimeout(() => btn.textContent = '复制', 1000);
+      });
+    };
+
+    // 添加chevron并初始化展开状态（默认折叠，用户点击切换）
+    document.querySelectorAll('.card-header').forEach(header => {
+      if (!header.querySelector('.chevron')) {
+        const chev = document.createElement('span');
+        chev.className = 'chevron';
+        chev.textContent = '›';
+        header.appendChild(chev);
+      }
+    });
+
+    // 确保所有collapsible初始是关闭的
+    document.querySelectorAll('.collapsible').forEach(c => c.classList.remove('open'));
+    document.querySelectorAll('.chevron').forEach(c => c.classList.remove('open'));
+  })();
+</script>
+</body>
+</html>
