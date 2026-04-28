@@ -5,34 +5,31 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>控制台实用工具箱 · 精简版</title>
   <style>
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
 
     body {
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-      background: #f5f7fa;
+      background: #f5f5f0;
       color: #1e1e2f;
     }
 
     .header {
-      background: #0b1a2f;
-      color: #ffffff;
+      background: #ffffff;
+      color: #1a1a1a;
       padding: 24px 32px;
-      border-bottom: 2px solid #2d4a6e;
+      border-bottom: 1px solid #e0e0d8;
     }
 
     .header h1 {
       font-size: 22px;
       font-weight: 600;
       letter-spacing: -0.3px;
+      color: #1a1a1a;
     }
 
     .header p {
       font-size: 13px;
-      color: #a0b3cc;
+      color: #9ca3af;
       margin-top: 6px;
     }
 
@@ -47,7 +44,7 @@
       font-weight: 700;
       text-transform: uppercase;
       letter-spacing: 1.5px;
-      color: #4a5c72;
+      color: #9ca3af;
       margin: 32px 0 12px;
       display: flex;
       align-items: center;
@@ -58,7 +55,7 @@
       content: '';
       flex: 1;
       height: 1px;
-      background: linear-gradient(90deg, #cbd5e1 0%, transparent 90%);
+      background: linear-gradient(90deg, #e0e0d8 0%, transparent 90%);
     }
 
     .card {
@@ -66,13 +63,13 @@
       border-radius: 14px;
       overflow: hidden;
       margin-bottom: 12px;
-      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.03), 0 1px 2px rgba(0, 0, 0, 0.05);
-      border: 1px solid #e2e8f0;
+      box-shadow: 0 1px 4px rgba(0,0,0,.04);
+      border: 1px solid #e0e0d8;
       transition: box-shadow 0.15s;
     }
 
     .card:hover {
-      box-shadow: 0 6px 14px rgba(0, 0, 0, 0.04);
+      box-shadow: 0 4px 12px rgba(0,0,0,.06);
     }
 
     .card-header {
@@ -87,9 +84,7 @@
       border-bottom: 1px solid transparent;
     }
 
-    .card-header:hover {
-      background: #fafcff;
-    }
+    .card-header:hover { background: #fafaf8; }
 
     .card-title {
       font-size: 15px;
@@ -102,7 +97,7 @@
 
     .card-desc {
       font-size: 12px;
-      color: #5e6f8d;
+      color: #9ca3af;
       margin-top: 3px;
     }
 
@@ -113,40 +108,38 @@
       font-weight: 600;
       letter-spacing: 0.2px;
       background: #eef2ff;
-      color: #1e3a8a;
-      border: 0.5px solid #cddfff;
+      color: #3730a3;
+      border: 0.5px solid #c7d2fe;
     }
 
     .badge-green {
-      background: #e3f2e9;
-      color: #0b5e3c;
-      border-color: #b7dec9;
+      background: #ecfdf5;
+      color: #065f46;
+      border-color: #a7f3d0;
     }
 
     .badge-amber {
-      background: #fff4e5;
-      color: #9e4c0e;
-      border-color: #ffd9a3;
+      background: #fffbeb;
+      color: #92400e;
+      border-color: #fde68a;
     }
 
     .badge-red {
-      background: #ffeae9;
-      color: #b42318;
-      border-color: #fccac7;
+      background: #fef2f2;
+      color: #991b1b;
+      border-color: #fecaca;
     }
 
     .collapsible {
       display: none;
-      border-top: 1px solid #edf2f7;
+      border-top: 1px solid #f0f0ea;
     }
 
-    .collapsible.open {
-      display: block;
-    }
+    .collapsible.open { display: block; }
 
     .code-block {
       position: relative;
-      background: #0d1b2a;
+      background: #1e2433;
     }
 
     .code-block pre {
@@ -165,7 +158,7 @@
       position: absolute;
       top: 10px;
       right: 12px;
-      background: #1f3547;
+      background: #2d3748;
       border: none;
       border-radius: 8px;
       color: #dee9fc;
@@ -174,51 +167,40 @@
       padding: 5px 12px;
       cursor: pointer;
       transition: all 0.15s;
-      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-      backdrop-filter: blur(2px);
     }
 
-    .copy-btn:hover {
-      background: #2e4b6b;
-      color: white;
-    }
-
-    .copy-btn.copied {
-      background: #1f7b4d;
-      color: white;
-    }
+    .copy-btn:hover { background: #3d4f66; color: white; }
+    .copy-btn.copied { background: #065f46; color: white; }
 
     .note {
       font-size: 11.5px;
-      color: #4a627a;
+      color: #6b7280;
       padding: 10px 18px 14px;
-      background: #f8fafd;
-      border-top: 1px dashed #dce5ec;
+      background: #fafaf8;
+      border-top: 1px dashed #e0e0d8;
       line-height: 1.5;
     }
 
     .chevron {
       font-size: 18px;
-      color: #7b8da3;
+      color: #9ca3af;
       transition: transform 0.2s;
       margin-left: 10px;
       font-weight: 400;
     }
 
-    .chevron.open {
-      transform: rotate(90deg);
-    }
+    .chevron.open { transform: rotate(90deg); }
 
-    /* 语法高亮 */
-    .kw { color: #f78c6c; font-weight: 500; }
-    .fn { color: #82aaff; }
+    .kw  { color: #f78c6c; font-weight: 500; }
+    .fn  { color: #82aaff; }
     .str { color: #c3e88d; }
-    .cm { color: #697098; font-style: italic; }
+    .cm  { color: #697098; font-style: italic; }
     .num { color: #f4b67c; }
     .var { color: #c792ea; }
   </style>
 </head>
 <body>
+
 <div class="header">
   <h1>⚡ Chrome 控制台速查手册 · 实用精简版</h1>
   <p>复制 → 粘贴到控制台 → 修改参数 → 回车即用。聚焦高频、稳定、免登录。</p>
@@ -226,10 +208,8 @@
 
 <div class="container">
 
-  <!-- ========= 网络请求 (fetch + 实用场景) ========= -->
   <div class="section-title">📡 HTTP 请求 · 即用</div>
 
-  <!-- GET + 表格展示 -->
   <div class="card">
     <div class="card-header" onclick="toggleCard(this)">
       <div>
@@ -256,7 +236,6 @@
     </div>
   </div>
 
-  <!-- POST JSON + token 模板 -->
   <div class="card">
     <div class="card-header" onclick="toggleCard(this)">
       <div>
@@ -291,7 +270,6 @@
     </div>
   </div>
 
-  <!-- 携带凭证 (credentials) 请求 —— 实用 -->
   <div class="card">
     <div class="card-header" onclick="toggleCard(this)">
       <div>
@@ -315,7 +293,6 @@
     </div>
   </div>
 
-  <!-- 轮询接口 (保留但优化) 实用 -->
   <div class="card">
     <div class="card-header" onclick="toggleCard(this)">
       <div>
@@ -345,10 +322,8 @@ console.<span class="fn">log</span>(<span class="str">'⏹️ 停止轮询: clea
     </div>
   </div>
 
-  <!-- ========= WebSocket (保留最稳定echo服务) ========= -->
   <div class="section-title">🔌 WebSocket · 测试回声</div>
 
-  <!-- WebSocket echo + token 示意 -->
   <div class="card">
     <div class="card-header" onclick="toggleCard(this)">
       <div>
@@ -378,7 +353,6 @@ ws.<span class="fn">onclose</span> = () => console.<span class="fn">log</span>(<
     </div>
   </div>
 
-  <!-- 并发发消息 (精简但保留) -->
   <div class="card">
     <div class="card-header" onclick="toggleCard(this)">
       <div>
@@ -398,7 +372,7 @@ ws2.<span class="fn">onopen</span> = () => {
   console.<span class="fn">log</span>(<span class="str">'📤 已连续发送3条消息'</span>);
 };
 ws2.<span class="fn">onmessage</span> = (e) => {
-  <span class="kw">try</span> { 
+  <span class="kw">try</span> {
     <span class="kw">const</span> <span class="var">data</span> = <span class="fn">JSON.parse</span>(e.data);
     console.<span class="fn">log</span>(<span class="str">`⬅️ 收到 seq=${data.seq}`</span>, data);
   } <span class="kw">catch</span> { console.<span class="fn">log</span>(<span class="str">'收到:'</span>, e.data); }
@@ -408,10 +382,8 @@ ws2.<span class="fn">onmessage</span> = (e) => {
     </div>
   </div>
 
-  <!-- ========= 实用调试 · 拦截 + 存储 ========= -->
   <div class="section-title">🛠️ 调试 & 拦截</div>
 
-  <!-- 拦截fetch (非常有用) -->
   <div class="card">
     <div class="card-header" onclick="toggleCard(this)">
       <div>
@@ -431,7 +403,7 @@ window.<span class="fn">fetch</span> = <span class="kw">async</span> (...args) =
   <span class="kw">const</span> response = <span class="kw">await</span> originalFetch(...args);
   <span class="kw">const</span> cloned = response.<span class="fn">clone</span>();
   cloned.<span class="fn">text</span>().<span class="fn">then</span>(body => {
-    <span class="kw">try</span> { 
+    <span class="kw">try</span> {
       <span class="kw">const</span> json = <span class="fn">JSON.parse</span>(body);
       console.<span class="fn">log</span>(<span class="str">'📋 响应 (json):'</span>, json);
     } <span class="kw">catch</span> { console.<span class="fn">log</span>(<span class="str">'📄 响应 (text):'</span>, body.<span class="fn">slice</span>(<span class="num">0</span>, <span class="num">200</span>)); }
@@ -445,7 +417,6 @@ console.<span class="fn">log</span>(<span class="str">'✅ fetch 拦截已激活
     </div>
   </div>
 
-  <!-- localStorage / sessionStorage 查看器 (补充实用) -->
   <div class="card">
     <div class="card-header" onclick="toggleCard(this)">
       <div>
@@ -475,7 +446,6 @@ console.<span class="fn">log</span>(<span class="str">'📁 sessionStorage:'</sp
     </div>
   </div>
 
-  <!-- 获取所有cookie (简单实用) -->
   <div class="card">
     <div class="card-header" onclick="toggleCard(this)">
       <div>
@@ -500,7 +470,6 @@ console.<span class="fn">table</span>(cookies);</pre>
     </div>
   </div>
 
-  <!-- 移除SSE —— 不常用且易误解，换成更实用的“复制响应为JSON” -->
   <div class="card">
     <div class="card-header" onclick="toggleCard(this)">
       <div>
@@ -523,7 +492,6 @@ console.<span class="fn">table</span>(cookies);</pre>
     </div>
   </div>
 
-  <!-- 轻提示：常用console方法 -->
   <div class="card">
     <div class="card-header" onclick="toggleCard(this)">
       <div>
@@ -558,7 +526,6 @@ console.<span class="fn">count</span>(<span class="str">'事件'</span>);</pre>
 
 <script>
   (function() {
-    // 折叠/展开
     window.toggleCard = function(headerEl) {
       const collapsible = headerEl.nextElementSibling;
       const chevron = headerEl.querySelector('.chevron');
@@ -568,7 +535,6 @@ console.<span class="fn">count</span>(<span class="str">'事件'</span>);</pre>
       }
     };
 
-    // 复制功能
     window.copyCode = function(btn) {
       const pre = btn.nextElementSibling;
       if (!pre) return;
@@ -576,12 +542,8 @@ console.<span class="fn">count</span>(<span class="str">'事件'</span>);</pre>
       navigator.clipboard?.writeText(text).then(() => {
         btn.textContent = '✅ 已复制';
         btn.classList.add('copied');
-        setTimeout(() => {
-          btn.textContent = '复制';
-          btn.classList.remove('copied');
-        }, 1400);
+        setTimeout(() => { btn.textContent = '复制'; btn.classList.remove('copied'); }, 1400);
       }).catch(() => {
-        // fallback
         const ta = document.createElement('textarea');
         ta.value = text;
         document.body.appendChild(ta);
@@ -593,7 +555,6 @@ console.<span class="fn">count</span>(<span class="str">'事件'</span>);</pre>
       });
     };
 
-    // 添加chevron并初始化展开状态（默认折叠，用户点击切换）
     document.querySelectorAll('.card-header').forEach(header => {
       if (!header.querySelector('.chevron')) {
         const chev = document.createElement('span');
@@ -603,7 +564,6 @@ console.<span class="fn">count</span>(<span class="str">'事件'</span>);</pre>
       }
     });
 
-    // 确保所有collapsible初始是关闭的
     document.querySelectorAll('.collapsible').forEach(c => c.classList.remove('open'));
     document.querySelectorAll('.chevron').forEach(c => c.classList.remove('open'));
   })();

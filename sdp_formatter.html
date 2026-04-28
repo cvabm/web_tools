@@ -156,20 +156,40 @@
         }
 
         function copyOutput() {
+    try {
+        const outputElement = document.getElementById('output');
+        const text = outputElement.innerText || outputElement.textContent;
+
+        const doAlert = () => alert('Formatted SDP copied to clipboard!');
+        const doError = (err) => {
+            console.error('Copy failed:', err);
+            alert('Failed to copy. Please copy manually.');
+        };
+
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+            // HTTPS 环境：使用现代 Clipboard API
+            navigator.clipboard.writeText(text).then(doAlert).catch(doError);
+        } else {
+            // HTTP 环境：降级方案
+            const textarea = document.createElement('textarea');
+            textarea.value = text;
+            textarea.style.cssText = 'position:fixed;top:-9999px;left:-9999px;opacity:0;';
+            document.body.appendChild(textarea);
+            textarea.focus();
+            textarea.select();
             try {
-                const outputElement = document.getElementById('output');
-                const text = outputElement.innerText || outputElement.textContent;
-                navigator.clipboard.writeText(text).then(() => {
-                    alert('Formatted SDP copied to clipboard!');
-                }).catch(err => {
-                    console.error('Copy failed:', err);
-                    alert('Failed to copy. Please copy manually.');
-                });
+                document.execCommand('copy') ? doAlert() : doError(new Error('execCommand failed'));
             } catch (err) {
-                console.error('Copy Error:', err);
-                document.getElementById('output').innerHTML = `<pre class="error">Error copying output: ${err.message}</pre>`;
+                doError(err);
+            } finally {
+                document.body.removeChild(textarea);
             }
         }
+    } catch (err) {
+        console.error('Copy Error:', err);
+        document.getElementById('output').innerHTML = `<pre class="error">Error copying output: ${err.message}</pre>`;
+    }
+}
     </script>
 </body>
 </html>

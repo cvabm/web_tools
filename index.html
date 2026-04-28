@@ -6,21 +6,12 @@
     <title>工具导航</title>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;700&display=swap" rel="stylesheet">
     <style>
-        :root {
-            --bg: #0f1117;
-            --surface: #1a1d27;
-            --border: #2a2d3e;
-            --text: #e8eaf0;
-            --text-dim: #6b7280;
-            --accent: #6366f1;
-        }
-
         * { margin: 0; padding: 0; box-sizing: border-box; }
 
         body {
             font-family: 'Noto Sans SC', sans-serif;
-            background: var(--bg);
-            color: var(--text);
+            background: #f5f5f0;
+            color: #1a1a1a;
             min-height: 100vh;
             padding: 48px 24px;
         }
@@ -34,12 +25,12 @@
             font-size: 1.6rem;
             font-weight: 300;
             letter-spacing: 0.3em;
-            color: var(--text-dim);
+            color: #6b7280;
             text-transform: uppercase;
         }
 
         header h1 span {
-            color: var(--accent);
+            color: #6366f1;
         }
 
         .container {
@@ -47,7 +38,6 @@
             margin: 0 auto;
         }
 
-        /* ─── 分组 ─────────────────────────────── */
         .group {
             margin-bottom: 40px;
         }
@@ -57,7 +47,7 @@
             font-weight: 500;
             letter-spacing: 0.25em;
             text-transform: uppercase;
-            color: var(--text-dim);
+            color: #9ca3af;
             margin-bottom: 12px;
             padding-left: 4px;
         }
@@ -68,28 +58,26 @@
             gap: 10px;
         }
 
-        /* ─── 按钮式链接 ─────────────────────────── */
         a.btn {
             display: inline-block;
             padding: 8px 18px;
-            border-radius: 6px;
+            border-radius: 8px;
             font-size: 0.875rem;
             font-weight: 400;
             text-decoration: none;
-            border: 1px solid var(--border);
-            background: var(--surface);
-            color: var(--text);
+            border: 1px solid #e0e0d8;
+            background: #ffffff;
+            color: #1a1a1a;
             transition: background 0.15s, border-color 0.15s, color 0.15s, transform 0.1s;
         }
 
         a.btn:hover {
-            background: var(--accent);
-            border-color: var(--accent);
+            background: #6366f1;
+            border-color: #6366f1;
             color: #fff;
             transform: translateY(-1px);
         }
 
-        /* ─── 列表式链接（思维导图用） ───────────── */
         .link-list {
             display: flex;
             flex-direction: column;
@@ -101,32 +89,31 @@
             align-items: center;
             gap: 10px;
             padding: 10px 16px;
-            border-radius: 6px;
-            border: 1px solid var(--border);
-            background: var(--surface);
-            color: var(--text);
+            border-radius: 8px;
+            border: 1px solid #e0e0d8;
+            background: #ffffff;
+            color: #1a1a1a;
             text-decoration: none;
             font-size: 0.875rem;
             transition: background 0.15s, border-color 0.15s, transform 0.1s;
         }
 
         a.list-item:hover {
-            background: #1e2130;
-            border-color: var(--accent);
+            background: #eef2ff;
+            border-color: #6366f1;
             transform: translateX(3px);
         }
 
         a.list-item::before {
             content: '↗';
             font-size: 0.75rem;
-            color: var(--accent);
-            opacity: 0.7;
+            color: #6366f1;
+            opacity: 0.8;
         }
 
-        /* ─── 分隔线 ─────────────────────────────── */
         hr {
             border: none;
-            border-top: 1px solid var(--border);
+            border-top: 1px solid #e0e0d8;
             margin: 40px 0;
         }
     </style>
@@ -139,20 +126,15 @@
 
 <div class="container">
 
-    <!-- ══════════════════════════════════════════════
-         ★ 如何增删链接：
-           - 增加：在对应 .links 里复制一行 <a> 标签，改 href 和文字即可
-           - 删除：把对应的 <a> 标签整行删掉
-           - 新建分组：复制一个 <div class="group"> ... </div> 块
-    ══════════════════════════════════════════════ -->
     <div class="group">
         <div class="group-label">其他</div>
         <div class="links">
             <a href="./web_guide.html" target="_blank" class="btn">网址导航</a>
-			<a href="./fetch.html" target="_blank" class="btn">chrome控制台测试</a>
-			<a href="./mock.html" target="_blank" class="btn">moke测试</a>
+            <a href="./fetch.html" target="_blank" class="btn">chrome控制台测试</a>
+            <a href="./mock.html" target="_blank" class="btn">mock测试</a>
         </div>
     </div>
+
     <div class="group">
         <div class="group-label">APK分享</div>
         <div class="links">
@@ -161,7 +143,6 @@
         </div>
     </div>
 
-    <!-- 分组：常用工具 -->
     <div class="group">
         <div class="group-label">常用工具</div>
         <div class="links">
@@ -171,7 +152,6 @@
         </div>
     </div>
 
-    <!-- 分组：开发工具 -->
     <div class="group">
         <div class="group-label">开发工具</div>
         <div class="links">
@@ -183,7 +163,6 @@
         </div>
     </div>
 
-    <!-- 分组：图片处理 -->
     <div class="group">
         <div class="group-label">图片处理</div>
         <div class="links">
@@ -191,7 +170,6 @@
         </div>
     </div>
 
-    <!-- 分组：WebRTC -->
     <div class="group">
         <div class="group-label">WebRTC</div>
         <div class="links">
@@ -200,7 +178,6 @@
         </div>
     </div>
 
-    <!-- 分组：Android 工具 -->
     <div class="group">
         <div class="group-label">Android 工具</div>
         <div class="links">
@@ -210,7 +187,6 @@
 
     <hr>
 
-    <!-- 分组：思维导图 -->
     <div class="group">
         <div class="group-label">思维导图</div>
         <div class="link-list">
