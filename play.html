@@ -1,0 +1,508 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>折腾记录 · 全文搜索</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: #f2f4f8;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            padding: 1.5rem 1rem;
+            color: #11181c;
+        }
+
+        /* 紧凑容器 */
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        /* 头部简洁 + 搜索区 */
+        .site-head {
+            margin-bottom: 1rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 1px solid #e2e8f0;
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+        }
+
+        .site-title {
+            font-size: 1.5rem;
+            font-weight: 640;
+            letter-spacing: -0.3px;
+            background: linear-gradient(135deg, #1f2b3c, #2563eb);
+            background-clip: text;
+            -webkit-background-clip: text;
+            color: transparent;
+        }
+
+        .badge {
+            font-size: 0.7rem;
+            background: #eef2ff;
+            padding: 4px 10px;
+            border-radius: 40px;
+            color: #1f4f9e;
+            font-weight: 500;
+        }
+
+        /* 全文搜索条 (顶部醒目) */
+        .search-bar {
+            margin-bottom: 1.4rem;
+            background: white;
+            border-radius: 48px;
+            border: 1px solid #e2edf5;
+            padding: 0.2rem 0.2rem 0.2rem 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.02);
+            transition: all 0.18s;
+        }
+
+        .search-bar:focus-within {
+            border-color: #7aa9e0;
+            box-shadow: 0 2px 10px rgba(37, 99, 235, 0.08);
+            background: #ffffff;
+        }
+
+        .search-icon {
+            font-size: 1rem;
+            color: #8197ab;
+            user-select: none;
+        }
+
+        .search-input {
+            flex: 1;
+            border: none;
+            padding: 0.7rem 0;
+            font-size: 0.9rem;
+            background: transparent;
+            outline: none;
+            color: #11181c;
+        }
+
+        .search-input::placeholder {
+            color: #b9c8e0;
+            font-weight: 400;
+        }
+
+        .search-clear {
+            background: none;
+            border: none;
+            font-size: 1.2rem;
+            cursor: pointer;
+            padding: 6px 12px;
+            border-radius: 40px;
+            color: #8ba0bc;
+            transition: 0.1s;
+            font-weight: 500;
+            line-height: 1;
+        }
+
+        .search-clear:hover {
+            background: #f0f4fa;
+            color: #1f4f9e;
+        }
+
+        .search-stats {
+            font-size: 0.7rem;
+            background: #f0f4f9;
+            padding: 0.2rem 0.7rem;
+            border-radius: 30px;
+            color: #3b5e8b;
+            white-space: nowrap;
+        }
+
+        /* 时间线 — 极简卡片列表 */
+        .timeline {
+            display: flex;
+            flex-direction: column;
+            gap: 0.85rem;
+        }
+
+        /* 笔记卡片，类似推特/memos 紧凑风格，无任何操作按钮 */
+        .note-card {
+            background: white;
+            border-radius: 20px;
+            padding: 0.9rem 1rem;
+            border: 1px solid #edf2f7;
+            transition: all 0.12s;
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.02);
+        }
+
+        .note-card:hover {
+            border-color: #cbd5e1;
+            background: #fefefe;
+        }
+
+        /* 高亮搜索词 */
+        .highlight {
+            background-color: #fcf4d9;
+            color: #b45200;
+            border-radius: 12px;
+            padding: 0 2px;
+            font-weight: 500;
+            transition: all 0.08s;
+        }
+
+        /* 头部：只显示时间（字符串，无发布人） */
+        .card-header {
+            margin-bottom: 8px;
+        }
+
+        .note-time {
+            color: #7c8ea0;
+            font-size: 0.7rem;
+            font-weight: 450;
+            letter-spacing: 0.2px;
+        }
+
+        /* 笔记正文区：文字+网址完全融合 */
+        .note-body {
+            font-size: 0.9rem;
+            line-height: 1.48;
+            color: #1e2a3a;
+            word-break: break-word;
+        }
+
+        .note-text {
+            white-space: pre-wrap;
+        }
+
+        /* 内嵌链接样式，紧凑且优雅 */
+        .inline-link {
+            display: inline-block;
+            background: #f1f5f9;
+            color: #1f4f9e;
+            border-radius: 24px;
+            padding: 2px 10px;
+            margin: 2px 0;
+            font-size: 0.8rem;
+            text-decoration: none;
+            word-break: break-all;
+            transition: 0.08s;
+            border: 1px solid #e6edf4;
+        }
+
+        .inline-link:hover {
+            background: #e6f0ff;
+            border-color: #b9d0f0;
+            text-decoration: underline;
+        }
+
+        /* 空状态（无匹配结果） */
+        .empty-note {
+            text-align: center;
+            padding: 2.2rem 1rem;
+            background: #ffffffcc;
+            border-radius: 28px;
+            color: #8ba0bc;
+            font-size: 0.8rem;
+            border: 1px dashed #cddfe7;
+        }
+
+        footer {
+            margin-top: 2rem;
+            font-size: 0.6rem;
+            text-align: center;
+            color: #9aaebf;
+            border-top: 1px solid #e2e8f0;
+            padding-top: 1rem;
+        }
+
+        @media (max-width: 500px) {
+            .note-card {
+                padding: 0.75rem 0.85rem;
+            }
+
+            .note-body {
+                font-size: 0.86rem;
+            }
+
+            .search-bar {
+                padding-left: 0.8rem;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <div class="site-head">
+            <span class="site-title">折腾记录</span>
+            <span class="badge" id="countBadge">0条</span>
+        </div>
+
+        <!-- 顶部全文搜索栏 -->
+        <div class="search-bar">
+            <span class="search-icon">🔍</span>
+            <input type="text" class="search-input" id="searchInput" placeholder="全文搜索 · 关键词 / 网址 / 日期..."
+                autocomplete="off">
+            <button class="search-clear" id="clearSearchBtn" aria-label="清空搜索">✕</button>
+            <span class="search-stats" id="searchStats">全部</span>
+        </div>
+
+        <!-- 静态时间线：所有内容直接由 DEFAULT_NOTES 渲染，支持动态搜索过滤 -->
+        <div class="timeline" id="timelineList">
+            <div class="empty-note" id="emptyMsg">✨ 笔记加载中...</div>
+        </div>
+        <footer>⚡ 纯展示 · 笔记内容定义在 DEFAULT_NOTES 中 · 顶部支持全文搜索高亮</footer>
+    </div>
+
+    <script>
+        // ============================================================
+        // 核心数据：请直接修改此数组来增删改笔记内容！
+        // 每一条笔记包含 content (支持网址混合) 和 dateStr (字符串日期，自由格式)
+        // 格式: { content: "笔记内容 网址:https://example.com", dateStr: "2025-04-10" 或 "刚刚" "昨天" 等 }
+        // 注意: dateStr 会原样显示，完全由您自定义，无需时间戳计算。
+        // 示例如下，请按照喜好直接修改或增加条目。
+        // ============================================================
+        const DEFAULT_NOTES = [
+            {
+                content: "折腾无极限】e5 572升级cpu4210m改4712mq https://tieba.baidu.com/p/4865090003",
+                dateStr: "2026-05-11"
+            },
+              {
+                content: "中国移动和家亲摄像头配网教程 http://117.72.36.204:8080/camera_config.html",
+                dateStr: "2026-05-11"
+            },
+            
+        ];
+
+        // 没有任何持久写入或交互逻辑，只负责渲染 DEFAULT_NOTES 数组 + 全文搜索 + 高亮。
+        let notesArray = [];          // 存储最终展示的笔记列表（原始超集）
+        let currentSearchKeyword = ""; // 当前搜索关键词
+
+        // 辅助生成短ID（只用于key避免报错，不暴露操作）
+        function genId() {
+            return 'note_' + Date.now() + '_' + Math.random().toString(36).substring(2, 8);
+        }
+
+        // 从文本中提取所有url并转为可点击链接（该函数用于纯文本 -> 链接化，搜索高亮需在链接化之后再应用高亮）
+        // 但为了高亮不影响HTML标签，需要先提取链接转为<a>，再对纯文本部分做高亮。 采用分段法：先调用renderTextWithLinks获得HTML，
+        // 然后在保留链接结构下对文本内容做关键词高亮（仅高亮纯文本部分，不破坏a标签）。更稳妥方式：写一个高亮包装器。
+        // 但这里为了安全，我们定义一个全局高亮函数: 给已生成的HTML片段中的纯文字部分（排除标签内）插入高亮。
+        // 策略: 由于链接已经转换成inline-link，我们最好在生成富文本时，分别处理文字块和链接块，然后对文字块进行高亮。
+        // 实现一个优化版本: renderTextWithLinksAndHighlight(text, keyword) 一次完成链接渲染和高亮。
+        function escapeHtml(str) {
+            if (!str) return '';
+            return str.replace(/[&<>]/g, function (m) {
+                if (m === '&') return '&amp;';
+                if (m === '<') return '&lt;';
+                if (m === '>') return '&gt;';
+                return m;
+            });
+        }
+
+        // 对纯文本高亮关键词 (不区分大小写)
+        function highlightPlainText(text, keyword) {
+            if (!keyword || keyword.trim() === "") return escapeHtml(text);
+            const escapedKeyword = keyword.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+            const regex = new RegExp(`(${escapedKeyword})`, 'gi');
+            // 注意 text 需要先转义，再高亮插入mark标签，但不能破坏转义字符。先转义再匹配。
+            const escapedText = escapeHtml(text);
+            return escapedText.replace(regex, `<span class="highlight">$1</span>`);
+        }
+
+        // 核心渲染：支持搜索关键词，生成带有链接和高亮的内容
+        function renderContentWithLinksAndHighlight(rawText, keyword) {
+            if (!rawText) return '';
+            // 分割url和普通文本 (保留原始文本与链接)
+            const urlRegex = /(https?:\/\/[^\s]+)/g;
+            const parts = rawText.split(urlRegex);
+
+            const processedParts = parts.map(part => {
+                // 判断是否为链接
+                if (part.match(/^https?:\/\//i)) {
+                    let displayUrl = part.length > 50 ? part.substring(0, 47) + '...' : part;
+                    // 链接部分不需要高亮 (网址通常不破坏视觉), 保持原链接样式
+                    return `<a href="${escapeHtml(part)}" target="_blank" rel="noopener noreferrer" class="inline-link">${escapeHtml(displayUrl)} ↗</a>`;
+                } else {
+                    // 纯文本区域 — 根据关键词高亮
+                    if (keyword && keyword.trim() !== "") {
+                        return highlightPlainText(part, keyword);
+                    } else {
+                        return escapeHtml(part);
+                    }
+                }
+            });
+            return processedParts.join('');
+        }
+
+        // 渲染全部笔记（支持搜索过滤 + 高亮）
+        function renderFilteredTimeline() {
+            const timelineDiv = document.getElementById('timelineList');
+            const emptyMsgDiv = document.getElementById('emptyMsg');
+            const countSpan = document.getElementById('countBadge');
+            const searchStatsSpan = document.getElementById('searchStats');
+            if (!timelineDiv) return;
+
+            // 获取原始 notesArray (未被修改的完整笔记)
+            let sourceNotes = [...notesArray];
+
+            // 关键词过滤（不区分大小写，匹配 content 和 dateStr 两个字段）
+            let filteredNotes = sourceNotes;
+            let keyword = currentSearchKeyword.trim();
+            if (keyword !== "") {
+                const lowerKeyword = keyword.toLowerCase();
+                filteredNotes = sourceNotes.filter(note => {
+                    const contentMatch = note.content && note.content.toLowerCase().includes(lowerKeyword);
+                    const dateMatch = note.dateStr && note.dateStr.toLowerCase().includes(lowerKeyword);
+                    return contentMatch || dateMatch;
+                });
+            }
+
+            // 排序（标准日期优先倒序，非标准日期顺延，保持与旧版本同样智能且友好）
+            function parseDateToNumber(dateStr) {
+                if (!dateStr) return 0;
+                const stdMatch = dateStr.match(/(\d{4})[-/](\d{1,2})[-/](\d{1,2})/);
+                if (stdMatch) {
+                    let [_, y, m, d] = stdMatch;
+                    return new Date(parseInt(y), parseInt(m) - 1, parseInt(d)).getTime();
+                }
+                if (dateStr.includes('昨天')) return Date.now() - 86400000;
+                if (dateStr.includes('今天')) return Date.now();
+                if (dateStr.includes('刚刚')) return Date.now();
+                return 0;
+            }
+            filteredNotes.sort((a, b) => {
+                let timeA = parseDateToNumber(a.dateStr);
+                let timeB = parseDateToNumber(b.dateStr);
+                if (timeA !== 0 && timeB !== 0) return timeB - timeA;
+                if (timeA !== 0) return -1;
+                if (timeB !== 0) return 1;
+                return 0;
+            });
+
+            const totalCount = sourceNotes.length;
+            const filteredCount = filteredNotes.length;
+            if (countSpan) countSpan.innerText = totalCount + '条';
+            if (searchStatsSpan) {
+                if (keyword === "") {
+                    searchStatsSpan.innerText = `全部 ${totalCount}`;
+                } else {
+                    searchStatsSpan.innerText = `找到 ${filteredCount}/${totalCount}`;
+                }
+            }
+
+            // 清空现有卡片
+            const existingCards = timelineDiv.querySelectorAll('.note-card');
+            existingCards.forEach(c => c.remove());
+
+            if (filteredNotes.length === 0) {
+                // 显示空状态
+                let emptyDiv = document.getElementById('emptyMsg');
+                if (!emptyDiv) {
+                    emptyDiv = document.createElement('div');
+                    emptyDiv.id = 'emptyMsg';
+                    emptyDiv.className = 'empty-note';
+                    timelineDiv.appendChild(emptyDiv);
+                }
+                emptyDiv.style.display = 'block';
+                if (keyword !== "") {
+                    emptyDiv.innerText = `🔎 没有找到包含「${escapeHtml(keyword)}」的笔记 · 试试其他词`;
+                } else {
+                    emptyDiv.innerText = '📭 暂无笔记 · 请修改 DEFAULT_NOTES 添加内容';
+                }
+                return;
+            } else {
+                const emptyElem = document.getElementById('emptyMsg');
+                if (emptyElem) emptyElem.style.display = 'none';
+            }
+
+            // 循环构建卡片 (仅展示，无任何按钮，日期原样，支持内容高亮)
+            filteredNotes.forEach(note => {
+                const card = document.createElement('div');
+                card.className = 'note-card';
+                const dateDisplay = note.dateStr && note.dateStr.trim() !== '' ? note.dateStr : '无日期';
+                // 使用支持高亮的富文本渲染 (根据当前关键词高亮)
+                const richContent = renderContentWithLinksAndHighlight(note.content, keyword);
+
+                card.innerHTML = `
+                <div class="card-header">
+                    <span class="note-time">📅 ${escapeHtml(dateDisplay)}</span>
+                </div>
+                <div class="note-body">
+                    <div class="note-text">${richContent}</div>
+                </div>
+            `;
+                timelineDiv.appendChild(card);
+            });
+        }
+
+        // 刷新搜索（监听输入并重新渲染）
+        function updateSearchAndRender() {
+            const searchInput = document.getElementById('searchInput');
+            if (searchInput) {
+                currentSearchKeyword = searchInput.value;
+            } else {
+                currentSearchKeyword = "";
+            }
+            renderFilteredTimeline();
+        }
+
+        // 清空搜索
+        function clearSearch() {
+            const searchInput = document.getElementById('searchInput');
+            if (searchInput) {
+                searchInput.value = "";
+                currentSearchKeyword = "";
+                renderFilteredTimeline();
+                searchInput.focus();
+            }
+        }
+
+        // 初始化数据：完全基于 DEFAULT_NOTES 构建，不做任何本地存储写入/读取
+        function initStaticData() {
+            const rawNotes = Array.isArray(DEFAULT_NOTES) ? DEFAULT_NOTES : [];
+            if (rawNotes.length === 0) {
+                notesArray = [];
+                renderFilteredTimeline();
+                return;
+            }
+
+            notesArray = rawNotes.map((item, idx) => {
+                let dateStrValue = (item.dateStr && typeof item.dateStr === 'string') ? item.dateStr : '';
+                if (dateStrValue === '' && item.content) {
+                    dateStrValue = '记录';
+                }
+                return {
+                    id: item.id || genId(),
+                    content: item.content || "（无内容）",
+                    dateStr: dateStrValue,
+                };
+            });
+            // 初始渲染
+            renderFilteredTimeline();
+
+            // 绑定搜索事件
+            const searchInput = document.getElementById('searchInput');
+            const clearBtn = document.getElementById('clearSearchBtn');
+            if (searchInput) {
+                searchInput.addEventListener('input', updateSearchAndRender);
+            }
+            if (clearBtn) {
+                clearBtn.addEventListener('click', clearSearch);
+            }
+        }
+
+        // 启动纯静态展示（全文搜索，高亮，无任何写入/删除/编辑逻辑）
+        initStaticData();
+
+        // 控制台友好提示
+        console.log('📌 纯展示 + 顶部全文搜索 · 实时过滤+高亮 · 所有内容来自 DEFAULT_NOTES 数组 · 支持搜索笔记内容/日期/网址');
+    </script>
+</body>
+
+</html>

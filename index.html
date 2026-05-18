@@ -2,14 +2,18 @@
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>工具导航</title>
-    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>工具导航 · 极简工坊</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,500;14..32,600&family=Noto+Sans+SC:wght@300;400;500;700&display=swap" rel="stylesheet">
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
 
         body {
-            font-family: 'Noto Sans SC', sans-serif;
+            font-family: 'Noto Sans SC', 'Inter', sans-serif;
             background: #F8F9FA;
             color: #1a1a1a;
             min-height: 100vh;
@@ -18,7 +22,7 @@
 
         header {
             text-align: center;
-            margin-bottom: 56px;
+            margin-bottom: 40px;
         }
 
         header h1 {
@@ -38,13 +42,85 @@
             margin: 0 auto;
         }
 
+        /* 服务器到期时间区块 — 顶部醒目样式 */
+        .server-expiry {
+            margin-bottom: 40px;
+            margin-top: 0;
+            text-align: center;
+            padding: 18px 24px;
+            background: linear-gradient(115deg, #FEF7E0 0%, #FFF5E8 100%);
+            border-radius: 32px;
+            border: 1px solid #FFE3A3;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.02), 0 1px 2px rgba(0, 0, 0, 0.03);
+            transition: all 0.2s ease;
+            backdrop-filter: blur(0px);
+        }
+
+        .server-expiry:hover {
+            border-color: #f5b042;
+            background: #FFFBF0;
+            box-shadow: 0 8px 20px rgba(245, 176, 66, 0.12);
+            transform: translateY(-1px);
+        }
+
+        .expiry-badge {
+            display: inline-flex;
+            align-items: baseline;
+            gap: 12px;
+            flex-wrap: wrap;
+            justify-content: center;
+            font-size: 0.9rem;
+            font-weight: 500;
+            color: #b45309;
+        }
+
+        .expiry-label {
+            font-size: 0.7rem;
+            font-weight: 600;
+            letter-spacing: 0.06em;
+            text-transform: uppercase;
+            background: #fbbf24;
+            color: #7c2d12;
+            padding: 4px 12px;
+            border-radius: 40px;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            backdrop-filter: blur(2px);
+            box-shadow: inset 0 0 0 0.5px rgba(255,255,200,0.8);
+        }
+
+        .expiry-date {
+            font-family: 'Noto Sans SC', 'JetBrains Mono', monospace;
+            font-weight: 620;
+            background: #FFFFFFCC;
+            padding: 4px 16px;
+            border-radius: 40px;
+            font-size: 0.9rem;
+            letter-spacing: 0.5px;
+            color: #9b4a0c;
+            border: 0.6px solid #ffda99;
+            backdrop-filter: blur(2px);
+            box-shadow: 0 1px 2px rgba(0,0,0,0.02);
+        }
+
+        .expiry-note {
+            font-size: 0.68rem;
+            color: #b87a3a;
+            font-weight: 450;
+            background: #FFF2E0;
+            padding: 2px 12px;
+            border-radius: 30px;
+            letter-spacing: 0.2px;
+        }
+
         .group {
             margin-bottom: 40px;
         }
 
         .group-label {
             font-size: 0.7rem;
-            font-weight: 500;
+            font-weight: 600;
             letter-spacing: 0.25em;
             text-transform: uppercase;
             color: #9ca3af;
@@ -75,7 +151,8 @@
             background: #6366f1;
             border-color: #6366f1;
             color: #fff;
-            transform: translateY(-1px);
+            transform: translateY(-2px);
+            box-shadow: 0 3px 8px rgba(99,102,241,0.15);
         }
 
         .link-list {
@@ -101,7 +178,7 @@
         a.list-item:hover {
             background: #eef2ff;
             border-color: #6366f1;
-            transform: translateX(3px);
+            transform: translateX(4px);
         }
 
         a.list-item::before {
@@ -116,23 +193,76 @@
             border-top: 1px solid #e0e0d8;
             margin: 40px 0;
         }
+
+        /* 响应式优化 */
+        @media (max-width: 520px) {
+            body {
+                padding: 32px 16px;
+            }
+
+            header h1 {
+                font-size: 1.35rem;
+                letter-spacing: 0.2em;
+            }
+
+            .server-expiry {
+                padding: 14px 16px;
+                margin-bottom: 32px;
+            }
+
+            .expiry-badge {
+                gap: 8px;
+                font-size: 0.75rem;
+            }
+
+            .expiry-date {
+                font-size: 0.8rem;
+                padding: 3px 12px;
+            }
+
+            .expiry-label {
+                font-size: 0.65rem;
+                padding: 3px 10px;
+            }
+
+            .expiry-note {
+                font-size: 0.62rem;
+                padding: 2px 10px;
+            }
+        }
+
+        /* 极简微动画 */
+        @keyframes softPulse {
+            0% { border-color: #FFE3A3; }
+            100% { border-color: #ffce7a; }
+        }
     </style>
 </head>
 <body>
 
-<header>
-    <h1>工具<span>导航</span></h1>
-</header>
-
 <div class="container">
+    <!-- 根据要求：服务器到期时间区块置于最顶部 (位于header之上 / 整体最上方) -->
+    <div class="server-expiry">
+        <div class="expiry-badge">
+            <span class="expiry-label">⏳ 服务状态</span>
+            <span class="expiry-date">服务器到期：2026-08-08 23:59:59</span>
+            <span class="expiry-note">请及时续费 · 保持服务稳定</span>
+        </div>
+    </div>
 
+    <header>
+        <h1>工具<span>导航</span></h1>
+    </header>
+
+    <!-- 核心导航区域 -->
     <div class="group">
-        <div class="group-label">其他</div>
+        <div class="group-label">我的</div>
         <div class="links">
-             <a href="./todo.html" target="_blank" class="btn">待办清单</a>
+            <a href="http://117.72.36.204/" target="_blank" class="btn">flatnotes</a>
+            <a href="https://www.notion.so/" target="_blank" class="btn">notion</a>
+            <a href="https://github.com/cvabm/" target="_blank" class="btn">github</a>
+            <a href="./play.html" target="_blank" class="btn">折腾记录</a>
             <a href="./web_guide.html" target="_blank" class="btn">网址导航</a>
-            <a href="./fetch.html" target="_blank" class="btn">chrome控制台测试</a>
-            <a href="./mock.html" target="_blank" class="btn">mock测试</a>
         </div>
     </div>
 
@@ -147,6 +277,7 @@
     <div class="group">
         <div class="group-label">常用工具</div>
         <div class="links">
+            <a href="./todo.html" target="_blank" class="btn">待办清单</a>
             <a href="./note.html" target="_blank" class="btn">记事本</a>
             <a href="./note_encrypt.html" target="_blank" class="btn">记事本（加密）</a>
             <a href="./software.html" target="_blank" class="btn">常用软件</a>
@@ -161,6 +292,8 @@
             <a href="./patch_viewer.html" target="_blank" class="btn">Patch Viewer</a>
             <a href="./coordinate_picker.html" target="_blank" class="btn">坐标拾取器</a>
             <a href="./coordinate_convert.html" target="_blank" class="btn">经纬度转换</a>
+            <a href="./fetch.html" target="_blank" class="btn">chrome控制台测试</a>
+            <a href="./mock.html" target="_blank" class="btn">mock测试</a>
         </div>
     </div>
 
@@ -191,13 +324,16 @@
     <div class="group">
         <div class="group-label">其他</div>
         <div class="link-list">
-            <a href="./camera_config.html" target="_blank" class="list-item">中国移动和家亲摄像头配网教程</a>
+           
             <a href="https://www.processon.com/view/link/68da1c22a225f06bfcab1464" target="_blank" class="list-item">Android 各功能实现</a>
             <a href="https://www.processon.com/view/link/68da1c6975ec317b6333d584" target="_blank" class="list-item">Android 知识</a>
             <a href="https://www.processon.com/view/link/68da1c77e6f1662eda99af69" target="_blank" class="list-item">JAVA</a>
         </div>
     </div>
 
+    <!-- 底部微留白，保证视觉舒适；原到期区块已提至顶部，避免重复 -->
+    <div style="height: 16px;"></div>
 </div>
+
 </body>
 </html>
