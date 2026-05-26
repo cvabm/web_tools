@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>S3 / MinIO 工具与 SDK 备忘</title>
+    <style>
+        :root {
+            --bg: #eef2f6;
+            --paper: #ffffff;
+            --line: #d7dde5;
+            --text: #1f2937;
+            --muted: #5f6b7a;
+            --accent: #0f766e;
+            --soft: #f6f8fb;
+            --code-bg: #111827;
+            --code-text: #dbe4f3;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            background: var(--bg);
+            color: var(--text);
+            font-family: "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+            padding: 20px 14px 32px;
+        }
+
+        .page {
+            max-width: 920px;
+            margin: 0 auto;
+            background: var(--paper);
+            border: 1px solid var(--line);
+            border-radius: 14px;
+            overflow: hidden;
+        }
+
+        .header,
+        .section,
+        .footer {
+            padding-left: 28px;
+            padding-right: 28px;
+        }
+
+        .header {
+            padding-top: 24px;
+            padding-bottom: 18px;
+            border-bottom: 1px solid var(--line);
+        }
+
+        .eyebrow {
+            margin: 0 0 8px;
+            color: var(--accent);
+            font-size: 12px;
+            font-weight: 700;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+        }
+
+        h1 {
+            margin: 0;
+            font-size: 28px;
+            line-height: 1.2;
+        }
+
+        .lead {
+            margin: 10px 0 0;
+            max-width: 760px;
+            color: var(--muted);
+            font-size: 14px;
+            line-height: 1.7;
+        }
+
+        .section {
+            padding-top: 18px;
+            padding-bottom: 18px;
+            border-top: 1px solid var(--line);
+        }
+
+        h2 {
+            margin: 0 0 10px;
+            font-size: 18px;
+            line-height: 1.3;
+        }
+
+        h3 {
+            margin: 0 0 8px;
+            font-size: 15px;
+            line-height: 1.3;
+        }
+
+        p,
+        li {
+            margin: 0;
+            color: var(--muted);
+            font-size: 14px;
+            line-height: 1.7;
+        }
+
+        ul {
+            margin: 0;
+            padding-left: 18px;
+        }
+
+        li + li {
+            margin-top: 6px;
+        }
+
+        a {
+            color: #1d4ed8;
+            text-decoration: none;
+            word-break: break-all;
+        }
+
+        a:hover {
+            text-decoration: underline;
+        }
+
+        .box {
+            padding: 12px 14px;
+            border: 1px solid var(--line);
+            border-radius: 10px;
+            background: var(--soft);
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 10px;
+        }
+
+        pre {
+            margin: 0;
+            padding: 12px 14px;
+            border-radius: 10px;
+            overflow: auto;
+            background: var(--code-bg);
+            color: var(--code-text);
+            font-size: 13px;
+            line-height: 1.6;
+        }
+
+        code {
+            font-family: Consolas, "Courier New", monospace;
+        }
+
+        .cmd-list {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 10px;
+        }
+
+        .footer {
+            padding-top: 16px;
+            padding-bottom: 22px;
+            border-top: 1px solid var(--line);
+            color: var(--muted);
+            font-size: 13px;
+            background: #fafbfd;
+        }
+
+        @media (max-width: 760px) {
+            .grid,
+            .cmd-list {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 640px) {
+            .header,
+            .section,
+            .footer {
+                padding-left: 18px;
+                padding-right: 18px;
+            }
+
+            h1 {
+                font-size: 24px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <article class="page">
+        <header class="header">
+            <p class="eyebrow">storage memo</p>
+            <h1>S3 / MinIO 工具与 SDK 备忘</h1>
+            <p class="lead">这页只留常用入口、容易踩坑的点和最常用的命令，不做大而全说明，目的是查得快。</p>
+        </header>
+
+        <section class="section">
+            <h2>S3 Browser</h2>
+            <div class="box">
+                <p><strong>S3 Browser</strong> 依然是最省事的图形化入口。</p>
+                <p style="margin-top:6px;"><a href="https://s3browser.com/" target="_blank" rel="noopener noreferrer">https://s3browser.com/</a></p>
+            </div>
+        </section>
+
+        <section class="section">
+            <h2>Android SDK</h2>
+            <div class="grid">
+                <div class="box">
+                    <h3>方式一</h3>
+                    <p>接得快，但没有进度条。</p>
+                    <p style="margin-top:6px;"><a href="https://github.com/cvabm/MinioForAndroid" target="_blank" rel="noopener noreferrer">https://github.com/cvabm/MinioForAndroid</a></p>
+                </div>
+                <div class="box">
+                    <h3>方式二</h3>
+                    <p>用 AWS 相关库自己封装进度条，偏正式，但当前没有现成 Demo。</p>
+                </div>
+            </div>
+            <div class="box" style="margin-top:10px;">
+                <p><strong>提醒：</strong>开始上传后，不要修改正在上传的文件，否则容易报错。</p>
+            </div>
+            <div style="margin-top:10px;">
+                <pre><code>列出桶内文件并删除
+val objectListing = s3.listObjects(BUCKET_NAME)
+val objectSummaries = objectListing.objectSummaries
+objectSummaries.forEach { summary ->
+    LogUtils.e(summary.key)
+    s3.deleteObject(BUCKET_NAME, summary.key)
+}
+
+删除桶
+s3.deleteBucket(BUCKET_NAME)</code></pre>
+            </div>
+            <ul style="margin-top:10px;">
+                <li>v4 签名创建的桶，不能用 v3 签名去删。</li>
+                <li>用 <code>AWS3SignerType</code> 创建的桶，删除时不要继续带这个签名设置。</li>
+                <li><code>2.21.0</code> 同时包含 S3 和 S4，默认走 S4。</li>
+                <li><code>S3SignerType</code> 是 v2 签名，URL 有效期最长可到 2 年。</li>
+                <li><code>AWSS3V4SignerType</code> 是 v4 签名，URL 有效期最长 7 天。</li>
+                <li>北京区域：<code>cn-north-1</code>；宁夏区域：<code>cn-northwest-1</code>。</li>
+            </ul>
+        </section>
+
+        <section class="section">
+            <h2>Windows `mc` 客户端</h2>
+            <p><a href="https://dl.min.io/client/mc/release/windows-amd64/mc.exe" target="_blank" rel="noopener noreferrer">https://dl.min.io/client/mc/release/windows-amd64/mc.exe</a></p>
+            <div class="cmd-list" style="margin-top:10px;">
+                <div class="box">
+                    <h3>连接与查看</h3>
+                    <pre><code>mc config host add minio http://xxxx:9500 username password
+mc config host list
+mc ls minio
+mc ls minio/capture-screen</code></pre>
+                </div>
+                <div class="box">
+                    <h3>创建与删除</h3>
+                    <pre><code>mc mb minio/bucket
+mc rb minio/bucket
+mc rb minio/bucket --force
+mc rm minio/bucket/hosts
+mc rm minio/bucket/etc --recursive --force</code></pre>
+                </div>
+                <div class="box">
+                    <h3>上传与下载</h3>
+                    <pre><code>mc cp E:\log.txt minio/bucket
+mc cp minio/bucket/log.txt E:\log
+mc cp minio/bucket/log.txt E:\log111.txt
+mc cp /myfolder minio/bucket --recursive</code></pre>
+                </div>
+                <div class="box">
+                    <h3>匿名权限</h3>
+                    <pre><code>mc anonymous get minio/bucket
+mc anonymous set public minio/bucket</code></pre>
+                </div>
+            </div>
+            <ul style="margin-top:10px;">
+                <li>常用命令重点记 `ls`、`cp`、`mb`、`rb`、`rm`、`mirror`、`config`。</li>
+                <li>完整文档：<a href="https://min.io/docs/minio/linux/reference/minio-mc.html" target="_blank" rel="noopener noreferrer">https://min.io/docs/minio/linux/reference/minio-mc.html</a></li>
+            </ul>
+        </section>
+
+        <section class="section">
+            <h2>其他</h2>
+            <p><a href="https://github.com/good-lly/s3mini" target="_blank" rel="noopener noreferrer">https://github.com/good-lly/s3mini</a></p>
+        </section>
+
+        <div class="footer">后面如果继续补内容，建议优先加预签名 URL、桶策略和跨端上传排障，不用再往展示感上堆样式。</div>
+    </article>
+</body>
+
+</html>

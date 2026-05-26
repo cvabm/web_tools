@@ -274,10 +274,31 @@
                 dateStr: "2026-05-11"
             },
               {
-                content: "中国移动和家亲摄像头配网教程 http://117.72.36.204:8080/camera_config.html",
+                content: "中国移动和家亲摄像头配网教程 http://117.72.36.204:8080/note/camera_config.html",
                 dateStr: "2026-05-11"
             },
-            
+            {
+                content: "shuziku常用插件清单 http://117.72.36.204:8080/note/shuziku_plugins.html",
+                dateStr: "2026-05-25"
+            },
+            {
+                content: "5G热点WIFI几种方案 http://117.72.36.204:8080/note/hotspot_5g_wifi_options.html",
+                dateStr: "2026-05-25"
+            },
+            {
+                content: "柱形电池选择参考 http://117.72.36.204:8080/note/cylindrical_battery_guide.html",
+                dateStr: "2026-05-25"
+            },
+
+            {
+                content: "S3 / MinIO 工具与 SDK 备忘 http://117.72.36.204:8080/note/s3_minio_guide.html",
+                dateStr: "2026-05-25"
+            },
+            {
+                content: "ios修复与巨魔TrollStore资料 http://117.72.36.204:8080/note/ipad_trollstore_notes.html",
+                dateStr: "2026-05-25"
+            },
+
         ];
 
         // 没有任何持久写入或交互逻辑，只负责渲染 DEFAULT_NOTES 数组 + 全文搜索 + 高亮。
@@ -341,6 +362,25 @@
         }
 
         // 渲染全部笔记（支持搜索过滤 + 高亮）
+        function renderContentWithLinksAndHighlight(rawText, keyword) {
+            if (!rawText) return '';
+
+            const urlMatch = rawText.match(/(https?:\/\/[^\s]+)/i);
+            if (!urlMatch) {
+                return keyword && keyword.trim() !== ""
+                    ? highlightPlainText(rawText, keyword)
+                    : escapeHtml(rawText);
+            }
+
+            const url = urlMatch[1];
+            const title = rawText.replace(url, '').trim() || url;
+            const renderedTitle = keyword && keyword.trim() !== ""
+                ? highlightPlainText(title, keyword)
+                : escapeHtml(title);
+
+            return `<a href="${escapeHtml(url)}" target="_blank" rel="noopener noreferrer" class="inline-link">${renderedTitle}</a>`;
+        }
+
         function renderFilteredTimeline() {
             const timelineDiv = document.getElementById('timelineList');
             const emptyMsgDiv = document.getElementById('emptyMsg');

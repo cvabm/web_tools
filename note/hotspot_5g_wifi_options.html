@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>5G 热点方案对比</title>
+    <style>
+        :root {
+            --bg: #eef2f6;
+            --paper: #ffffff;
+            --line: #d7dde5;
+            --text: #1f2937;
+            --muted: #5f6b7a;
+            --accent: #1d4ed8;
+            --soft: #f6f8fb;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            background: var(--bg);
+            color: var(--text);
+            font-family: "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+            padding: 20px 14px 32px;
+        }
+
+        .page {
+            max-width: 900px;
+            margin: 0 auto;
+            background: var(--paper);
+            border: 1px solid var(--line);
+            border-radius: 14px;
+            overflow: hidden;
+        }
+
+        .header,
+        .section,
+        .footer {
+            padding-left: 28px;
+            padding-right: 28px;
+        }
+
+        .header {
+            padding-top: 24px;
+            padding-bottom: 18px;
+            border-bottom: 1px solid var(--line);
+        }
+
+        .eyebrow {
+            margin: 0 0 8px;
+            color: var(--accent);
+            font-size: 12px;
+            font-weight: 700;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+        }
+
+        h1 {
+            margin: 0;
+            font-size: 28px;
+            line-height: 1.2;
+        }
+
+        .lead {
+            margin: 10px 0 0;
+            max-width: 720px;
+            color: var(--muted);
+            font-size: 14px;
+            line-height: 1.7;
+        }
+
+        .section {
+            padding-top: 18px;
+            padding-bottom: 18px;
+            border-top: 1px solid var(--line);
+        }
+
+        h2 {
+            margin: 0 0 10px;
+            font-size: 18px;
+            line-height: 1.3;
+        }
+
+        p,
+        li,
+        td,
+        th {
+            font-size: 14px;
+            line-height: 1.65;
+        }
+
+        p,
+        li,
+        td {
+            color: var(--muted);
+        }
+
+        ul {
+            margin: 0;
+            padding-left: 18px;
+        }
+
+        li + li {
+            margin-top: 6px;
+        }
+
+        .summary {
+            display: grid;
+            grid-template-columns: repeat(4, minmax(0, 1fr));
+            gap: 10px;
+        }
+
+        .summary-item {
+            padding: 12px 14px;
+            border: 1px solid var(--line);
+            border-radius: 10px;
+            background: var(--soft);
+        }
+
+        .summary-item strong {
+            display: block;
+            margin-bottom: 4px;
+            color: var(--text);
+            font-size: 13px;
+        }
+
+        .table-wrap {
+            overflow-x: auto;
+            border: 1px solid var(--line);
+            border-radius: 10px;
+        }
+
+        table {
+            width: 100%;
+            min-width: 720px;
+            border-collapse: collapse;
+        }
+
+        th,
+        td {
+            padding: 11px 12px;
+            text-align: left;
+            vertical-align: top;
+            border-bottom: 1px solid var(--line);
+        }
+
+        th {
+            color: var(--text);
+            background: #fafbfd;
+            font-weight: 600;
+        }
+
+        tr:last-child td {
+            border-bottom: none;
+        }
+
+        .footer {
+            padding-top: 16px;
+            padding-bottom: 22px;
+            border-top: 1px solid var(--line);
+            color: var(--muted);
+            font-size: 13px;
+            background: #fafbfd;
+        }
+
+        @media (max-width: 720px) {
+            .summary {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+            }
+        }
+
+        @media (max-width: 640px) {
+            .header,
+            .section,
+            .footer {
+                padding-left: 18px;
+                padding-right: 18px;
+            }
+
+            h1 {
+                font-size: 24px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <article class="page">
+        <header class="header">
+            <p class="eyebrow">comparison</p>
+            <h1>5G 热点方案对比</h1>
+            <p class="lead">把几种常见方案按预算、折腾程度和最终体验放在一起，适合先快速筛掉不适合自己的路线。</p>
+        </header>
+
+        <section class="section">
+            <h2>先看结论</h2>
+            <div class="summary">
+                <div class="summary-item">
+                    <strong>最低预算</strong>
+                    <span>130 元档可起步。</span>
+                </div>
+                <div class="summary-item">
+                    <strong>性价比路线</strong>
+                    <span>通信壳加旧路由器更划算。</span>
+                </div>
+                <div class="summary-item">
+                    <strong>省心路线</strong>
+                    <span>中兴 F50 这类成品更稳妥。</span>
+                </div>
+                <div class="summary-item">
+                    <strong>体验优先</strong>
+                    <span>华为 CPE 8020 效果最好。</span>
+                </div>
+            </div>
+        </section>
+
+        <section class="section">
+            <h2>方案对照</h2>
+            <div class="table-wrap">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>方案</th>
+                            <th>价格 / 定位</th>
+                            <th>优点</th>
+                            <th>缺点 / 提醒</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>以晴 Q968 老年机开热点</strong></td>
+                            <td>闲鱼约 130 元，低预算方案。</td>
+                            <td>便宜，能插自己的卡，适合先跑通。</td>
+                            <td>要改直供电，长期通电时电池容易鼓包，后期维护更多。</td>
+                        </tr>
+                        <tr>
+                            <td><strong>5G 通信壳 + 小米 3G 路由器</strong></td>
+                            <td>约 160 元，性价比路线。</td>
+                            <td>成本不高，组合灵活。</td>
+                            <td>完成度取决于具体搭配，稳定性和兼容性要自己试。</td>
+                        </tr>
+                        <tr>
+                            <td><strong>中兴 F50</strong></td>
+                            <td>大几百，成品热点设备。</td>
+                            <td>更像开箱即用，后续折腾少。</td>
+                            <td>价格明显更高，但省心不少。</td>
+                        </tr>
+                        <tr>
+                            <td><strong>华为 CPE 8020</strong></td>
+                            <td>预算最高，体验优先。</td>
+                            <td>整体效果和稳定性最好。</td>
+                            <td>不适合压预算，适合直接追求成品体验。</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <section class="section">
+            <h2>补充说明</h2>
+            <ul>
+                <li>预算优先就看老年机或通信壳组合。</li>
+                <li>不想排障太多，就直接看成品设备。</li>
+                <li>长期插电运行的方案，优先考虑供电和散热，而不是只看初始价格。</li>
+            </ul>
+        </section>
+
+        <div class="footer">如果只是先验证能不能用，低价方案够了；如果要长期稳定挂着跑，成品设备更划算。</div>
+    </article>
+</body>
+
+</html>
